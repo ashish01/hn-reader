@@ -64,8 +64,6 @@ const Comment: React.FC<CommentProps> = ({
     return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
   };
 
-  // Calculate the indentation level (capped at MAX_INDENT)
-  const indentLevel = Math.min(level, MAX_INDENT);
   
   // Determine border style for deeply nested comments (level > MAX_INDENT)
   const extraClass = level > MAX_INDENT ? 'deeply-nested' : '';
