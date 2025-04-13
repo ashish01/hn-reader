@@ -68,7 +68,14 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId, onBack }) => {
       </button>
 
       <div className="story-details">
-        <h1>{story.title}</h1>
+        <h1>
+          <a
+            href={`https://news.ycombinator.com/item?id=${story.id}`}
+            rel="noopener noreferrer"
+          >
+            {story.title}
+          </a>
+        </h1>
 
         {story.url && (
           <div className="story-url">
