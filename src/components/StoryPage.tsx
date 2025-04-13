@@ -79,7 +79,7 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId, onBack }) => {
 
         {story.url && (
           <div className="story-url">
-            <a href={story.url} target="_blank" rel="noopener noreferrer">
+            <a href={story.url} rel="noopener noreferrer">
               {formatUrl(story.url)}
             </a>
           </div>

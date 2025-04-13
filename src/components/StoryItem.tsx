@@ -41,12 +41,11 @@ const StoryItem: React.FC<StoryItemProps> = ({ story, onClick }) => {
 
   return (
     // Apply the .story-item class which now includes padding, margin, radius
-    <div className="story-item"> 
+    <div className="story-item">
       {/* Apply .story-title class */}
-      <div className="story-title"> 
+      <div className="story-title">
         <a
           href={story.url}
-          target="_blank"
           rel="noopener noreferrer"
           // Link styles handled by .story-title a in CSS
         >
@@ -54,17 +53,15 @@ const StoryItem: React.FC<StoryItemProps> = ({ story, onClick }) => {
         </a>
         {story.url && (
           // Apply .story-domain class
-          <span className="story-domain"> 
-            ({formatUrl(story.url)})
-          </span>
+          <span className="story-domain">({formatUrl(story.url)})</span>
         )}
       </div>
       {/* Apply .story-info class */}
-      <div className="story-info"> 
+      <div className="story-info">
         {/* Remove mr-2, gap is handled by .story-info */}
-        <span>{story.score} points</span> 
-        <span>by {story.by}</span> 
-        <span>{formatTime(story.time)}</span> 
+        <span>{story.score} points</span>
+        <span>by {story.by}</span>
+        <span>{formatTime(story.time)}</span>
         <a
           // Apply .story-comments-link class
           className="story-comments-link"
