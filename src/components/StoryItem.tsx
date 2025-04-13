@@ -40,28 +40,34 @@ const StoryItem: React.FC<StoryItemProps> = ({ story, onClick }) => {
   };
 
   return (
-    <div className="flex-1 -mx-2 px-2 py-1 rounded-md">
-      <div className="mb-1">
+    // Apply the .story-item class which now includes padding, margin, radius
+    <div className="story-item"> 
+      {/* Apply .story-title class */}
+      <div className="story-title"> 
         <a
           href={story.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-900 dark:text-gray-100 font-medium hover:underline"
+          // Link styles handled by .story-title a in CSS
         >
           {story.title}
         </a>
         {story.url && (
-          <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+          // Apply .story-domain class
+          <span className="story-domain"> 
             ({formatUrl(story.url)})
           </span>
         )}
       </div>
-      <div className="flex flex-wrap text-xs text-gray-500 dark:text-gray-400">
-        <span className="mr-2">{story.score} points</span>{" "}
-        <span className="mr-2">by {story.by}</span>{" "}
-        <span className="mr-2">{formatTime(story.time)}</span>{" "}
+      {/* Apply .story-info class */}
+      <div className="story-info"> 
+        {/* Remove mr-2, gap is handled by .story-info */}
+        <span>{story.score} points</span> 
+        <span>by {story.by}</span> 
+        <span>{formatTime(story.time)}</span> 
         <a
-          className="hover:underline cursor-auto"
+          // Apply .story-comments-link class
+          className="story-comments-link"
           onClick={handleClick}
           role="button"
           tabIndex={0}

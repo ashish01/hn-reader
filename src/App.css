@@ -96,31 +96,64 @@ a:visited {
 .story-item {
   flex: 1;
   cursor: pointer;
+  /* Replaces py-1, px-2, -mx-2, rounded-md */
+  padding: 0.25rem 0.5rem; 
+  margin: 0 -0.5rem; 
+  border-radius: 0.375rem; 
 }
 
 .story-item:hover {
+  /* Replicates hover effect */
   background-color: rgba(0, 0, 0, 0.02);
 }
 
 .story-title {
+  /* Replaces mb-1 */
   font-size: 16px;
-  margin-bottom: 5px;
+  margin-bottom: 0.25rem; 
   font-weight: 500;
 }
 
+/* Style for the story title link */
+.story-title a {
+  /* Replaces text-gray-900 dark:text-gray-100 */
+  color: var(--text-color); 
+  text-decoration: none;
+}
+.story-title a:hover {
+  /* Replaces hover:underline */
+  text-decoration: underline;
+}
+
 .story-domain {
+  /* Replaces text-xs text-gray-500 dark:text-gray-400 ml-1 */
   color: var(--light-text);
-  font-size: 12px;
-  margin-left: 5px;
+  font-size: 12px; /* Equivalent to text-xs */
+  margin-left: 0.25rem; /* Equivalent to ml-1 */
 }
 
 .story-info {
-  font-size: 13px;
+  /* Replaces flex flex-wrap text-xs text-gray-500 dark:text-gray-400 */
+  /* Replaces flex flex-wrap text-xs text-gray-500 dark:text-gray-400 */
+  font-size: 12px; /* Equivalent to text-xs */
   color: var(--light-text);
   display: flex;
-  gap: 7px;
+  gap: 0.5rem; /* Equivalent to mr-2 on children */
   flex-wrap: wrap;
 }
+
+/* Style for the comments link within story-info */
+.story-comments-link {
+  /* Replaces hover:underline cursor-auto */
+  color: var(--light-text); /* Inherit color */
+  text-decoration: none;
+  cursor: pointer; /* Make it clear it's clickable */
+}
+
+.story-comments-link:hover {
+  text-decoration: underline;
+}
+
 
 /* Navigation */
 .stories-controls {
@@ -144,6 +177,10 @@ a:visited {
 .page-info {
   font-size: 14px;
   color: var(--light-text);
+}
+
+.stories-controls-bottom {
+  margin-top: 20px;
 }
 
 /* Story page */
@@ -211,8 +248,15 @@ a:visited {
   border-radius: 4px;
 }
 
+/* Indentation for comments, capped at level 3 */
+.comment-indent-1 { margin-left: 12px; }
+.comment-indent-2 { margin-left: 24px; }
+.comment-indent-3 { margin-left: 36px; }
+
 .deeply-nested {
   border-left: 3px solid var(--hn-orange);
+  /* Apply max indent margin if deeply nested */
+  margin-left: 36px !important; 
 }
 
 .comment-header {

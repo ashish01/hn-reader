@@ -64,17 +64,20 @@ const Comment: React.FC<CommentProps> = ({
     return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
   };
 
-  // Calculate the indentation (capped at MAX_INDENT)
+  // Calculate the indentation level (capped at MAX_INDENT)
   const indentLevel = Math.min(level, MAX_INDENT);
   
-  // Determine border style for deeply nested comments
+  // Determine border style for deeply nested comments (level > MAX_INDENT)
   const extraClass = level > MAX_INDENT ? 'deeply-nested' : '';
+  
+  // Determine indentation class (levels 1 to MAX_INDENT)
+  const indentClass = level > 0 && level <= MAX_INDENT ? `comment-indent-${level}` : '';
+
+  // Combine classes, ensuring deeply-nested overrides indentClass margin if needed
+  const combinedClasses = ['comment', extraClass, indentClass].filter(Boolean).join(' ');
 
   return (
-    <div 
-      className={`comment ${extraClass}`} 
-      style={{ marginLeft: `${indentLevel * 12}px` }}
-    >
+    <div className={combinedClasses}>
       <div className="comment-header">
         <span className="comment-author">{comment.by}</span>
         <span className="comment-time">{formatTime(comment.time)}</span>

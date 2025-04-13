@@ -95,7 +95,7 @@ const StoriesPage: React.FC<StoriesPageProps> = ({
       )}
       
       {stories.length > 0 && (
-        <div className="stories-controls" style={{ marginTop: '20px' }}>
+        <div className="stories-controls stories-controls-bottom">
           <div className="stories-nav">
             {currentPage > 0 && (
               <a href="#" onClick={(e) => {
