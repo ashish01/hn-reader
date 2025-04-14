@@ -101,16 +101,6 @@ const StoryItem: React.FC<StoryItemProps> = ({ story: initialStory, onClick, onT
     <div className={getStoryItemClass()}>
       <div className="story-title">
         <div className="story-title-row">
-          {onTogglePin && (
-            <button
-              className={`pin-button ${story.pinned ? 'pinned' : ''}`}
-              onClick={handlePinClick}
-              aria-label={story.pinned ? "Unpin story" : "Pin story"}
-              title={story.pinned ? "Unpin story" : "Pin story"}
-            >
-              {story.pinned ? "📍" : "📌"}
-            </button>
-          )}
           <a
             href={story.url}
             rel="noopener noreferrer"
@@ -140,6 +130,26 @@ const StoryItem: React.FC<StoryItemProps> = ({ story: initialStory, onClick, onT
         >
           {story.descendants || 0} comments
         </a>
+        {onTogglePin && (
+          <a
+            className={`pin-link ${story.pinned ? 'pinned' : ''}`}
+            onClick={handlePinClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                // Create a synthetic event object with just stopPropagation
+                const syntheticEvent = {
+                  stopPropagation: () => {}
+                };
+                handlePinClick(syntheticEvent as React.MouseEvent<HTMLAnchorElement>);
+              }
+            }}
+          >
+            {story.pinned ? "unpin" : "pin"}
+          </a>
+        )}
       </div>
     </div>
   );

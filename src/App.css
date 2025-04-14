@@ -109,7 +109,7 @@ a:visited {
 
 /* Styles for pinned stories */
 .pinned-story {
-  border-left: 2px solid var(--hn-orange);
+  /* No background color here, moved to container */
 }
 
 /* Styles for visited stories */
@@ -196,6 +196,21 @@ a:visited {
 
 .story-comments-link:hover {
   text-decoration: underline;
+}
+
+/* Style for the pin link within story-info */
+.pin-link {
+  color: var(--light-text);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.pin-link:hover {
+  text-decoration: underline;
+}
+
+.pin-link.pinned {
+  color: var(--hn-orange);
 }
 
 
@@ -406,11 +421,11 @@ a:visited {
 
 /* Pinned container styling */
 .pinned-container {
-  background-color: rgba(255, 102, 0, 0.08);
   position: relative;
+  background-color: rgba(255, 102, 0, 0.08);
 }
 
-/* Remove the left border indicator, we'll rely on just the pin icon */
+/* Using container background color and pin/unpin text for pinned stories */
 
 /* Media queries for responsive design */
 @media (max-width: 768px) {
