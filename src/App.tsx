@@ -38,6 +38,22 @@ function StoriesRoute() {
   const currentPage = pageParam ? parseInt(pageParam, 10) : 0;
 
   const handleStorySelect = (id: number) => {
+    // Import is problematic (circular), so access localStorage directly 
+    try {
+      const visitedStories = JSON.parse(localStorage.getItem('hn-visited-stories') || '[]');
+      if (!visitedStories.includes(id)) {
+        visitedStories.push(id);
+        localStorage.setItem('hn-visited-stories', JSON.stringify(visitedStories));
+        
+        // Dispatch a storage event so other components can react to this change
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'hn-visited-stories'
+        }));
+      }
+    } catch (e) {
+      console.error('Error saving visited story to localStorage:', e);
+    }
+    
     navigate(`/story/${id}`);
   };
 

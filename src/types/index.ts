@@ -24,6 +24,8 @@ export interface Story extends Item {
   url?: string;
   score: number;
   descendants: number;
+  pinned?: boolean;
+  visited?: boolean;
 }
 
 export interface Comment extends Item {

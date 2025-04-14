@@ -1,12 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { Story } from "../types";
 
 interface StoryItemProps {
   story: Story;
   onClick: (id: number) => void;
+  onTogglePin?: (story: Story) => void;
 }
 
-const StoryItem: React.FC<StoryItemProps> = ({ story, onClick }) => {
+const StoryItem: React.FC<StoryItemProps> = ({ story: initialStory, onClick, onTogglePin }) => {
+  // Use local state to track visited status for immediate UI updates
+  const [story, setStory] = useState<Story>(initialStory);
+  
+  // Update local state when prop changes
+  React.useEffect(() => {
+    setStory(initialStory);
+  }, [initialStory]);
   // Format the time as a relative time string
   const formatTime = (time: number | undefined) => {
     if (!time) return "";
@@ -27,6 +35,44 @@ const StoryItem: React.FC<StoryItemProps> = ({ story, onClick }) => {
     onClick(story.id);
   };
 
+  const handlePinClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onTogglePin) {
+      // Update local state first for immediate feedback
+      setStory(prevStory => ({
+        ...prevStory,
+        pinned: !prevStory.pinned
+      }));
+      
+      // Then update storage through the parent
+      onTogglePin(story);
+    }
+  };
+  
+  const handleUrlClick = () => {
+    // Import would create a circular dependency, so we access directly
+    try {
+      const visitedStories = JSON.parse(localStorage.getItem('hn-visited-stories') || '[]');
+      if (!visitedStories.includes(story.id)) {
+        visitedStories.push(story.id);
+        localStorage.setItem('hn-visited-stories', JSON.stringify(visitedStories));
+        
+        // Update local state for immediate UI update
+        setStory(prevStory => ({
+          ...prevStory,
+          visited: true
+        }));
+        
+        // Dispatch a storage event so other components can react to this change
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'hn-visited-stories'
+        }));
+      }
+    } catch (e) {
+      console.error('Error saving visited story to localStorage:', e);
+    }
+  };
+
   // Format the URL to display just the domain
   const formatUrl = (url: string | undefined) => {
     if (!url) return "";
@@ -39,31 +85,49 @@ const StoryItem: React.FC<StoryItemProps> = ({ story, onClick }) => {
     }
   };
 
+  // Determine the appropriate class based on visited and pinned status
+  const getStoryItemClass = () => {
+    let className = "story-item";
+    if (story.visited && !story.pinned) {
+      className += " visited-story";
+    }
+    if (story.pinned) {
+      className += " pinned-story";
+    }
+    return className;
+  };
+
   return (
-    // Apply the .story-item class which now includes padding, margin, radius
-    <div className="story-item">
-      {/* Apply .story-title class */}
+    <div className={getStoryItemClass()}>
       <div className="story-title">
-        <a
-          href={story.url}
-          rel="noopener noreferrer"
-          // Link styles handled by .story-title a in CSS
-        >
-          {story.title}
-        </a>
-        {story.url && (
-          // Apply .story-domain class
-          <span className="story-domain">({formatUrl(story.url)})</span>
-        )}
+        <div className="story-title-row">
+          {onTogglePin && (
+            <button
+              className={`pin-button ${story.pinned ? 'pinned' : ''}`}
+              onClick={handlePinClick}
+              aria-label={story.pinned ? "Unpin story" : "Pin story"}
+              title={story.pinned ? "Unpin story" : "Pin story"}
+            >
+              {story.pinned ? "📍" : "📌"}
+            </button>
+          )}
+          <a
+            href={story.url}
+            rel="noopener noreferrer"
+            onClick={handleUrlClick}
+          >
+            {story.title}
+          </a>
+          {story.url && (
+            <span className="story-domain">({formatUrl(story.url)})</span>
+          )}
+        </div>
       </div>
-      {/* Apply .story-info class */}
       <div className="story-info">
-        {/* Remove mr-2, gap is handled by .story-info */}
         <span>{story.score} points</span>
         <span>by {story.by}</span>
         <span>{formatTime(story.time)}</span>
         <a
-          // Apply .story-comments-link class
           className="story-comments-link"
           onClick={handleClick}
           role="button"
