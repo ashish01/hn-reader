@@ -13,7 +13,7 @@ interface CommentProps {
   level?: number;
 }
 
-const MAX_INDENT = 3; // Maximum level of indentation
+const MAX_INDENT = 4; // Maximum level of indentation
 
 const Comment: React.FC<CommentProps> = ({
   comment,
