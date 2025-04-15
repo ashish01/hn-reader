@@ -84,11 +84,9 @@ const Comment: React.FC<CommentProps> = ({
         >
           {formatTime(comment.time)}
         </a>
-        {comment.kids && comment.kids.length > 0 && (
-          <button className="comment-toggle" onClick={handleToggle}>
-            {expanded ? "[-]" : "[+]"}
-          </button>
-        )}
+        <button className="comment-toggle" onClick={handleToggle}>
+          {expanded ? "[-]" : "[+]"}
+        </button>
       </div>
 
       {expanded && (

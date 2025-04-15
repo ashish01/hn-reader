@@ -9,6 +9,29 @@ interface CommentWithChildren extends Comment {
   childrenLoaded?: boolean;
 }
 
+// Helper functions for localStorage
+const getCommentKey = (storyId: number, commentId: number) => `hn-comment-${storyId}-${commentId}`;
+
+const getStoredCommentState = (storyId: number, commentId: number): boolean | null => {
+  try {
+    const key = getCommentKey(storyId, commentId);
+    const storedValue = localStorage.getItem(key);
+    return storedValue !== null ? storedValue === 'true' : null;
+  } catch (e) {
+    console.error('Error reading from localStorage:', e);
+    return null;
+  }
+};
+
+const saveCommentState = (storyId: number, commentId: number, isExpanded: boolean) => {
+  try {
+    const key = getCommentKey(storyId, commentId);
+    localStorage.setItem(key, isExpanded.toString());
+  } catch (e) {
+    console.error('Error writing to localStorage:', e);
+  }
+};
+
 export const useStoryWithComments = (storyId: number) => {
   const [story, setStory] = useState<Story | null>(null);
   const [comments, setComments] = useState<CommentWithChildren[]>([]);
@@ -94,10 +117,13 @@ export const useStoryWithComments = (storyId: number) => {
             
             if (!isMounted) return null;
             
-            // Add UI state properties
+            // Check localStorage for saved state
+            const savedExpanded = getStoredCommentState(storyId, kidId);
+            
+            // Add UI state properties - use saved state or default to true
             const commentWithState = {
               ...comment,
-              isExpanded: true,
+              isExpanded: savedExpanded !== null ? savedExpanded : true,
               childrenLoaded: false,
               children: []
             };
@@ -146,16 +172,23 @@ export const useStoryWithComments = (storyId: number) => {
     };
   }, [storyId]);
 
-  // Function to toggle comment expansion
+  // Function to toggle comment expansion and save to localStorage
   const toggleComment = useCallback((commentId: number) => {
-    setComments(prevComments => 
-      updateCommentInTree(
+    setComments(prevComments => {
+      // Find current state to determine new state
+      const comment = findCommentById(commentId, prevComments);
+      const newExpandedState = comment ? !comment.isExpanded : false;
+      
+      // Save to localStorage
+      saveCommentState(storyId, commentId, newExpandedState);
+      
+      return updateCommentInTree(
         commentId,
-        comment => ({ ...comment, isExpanded: !comment.isExpanded }),
+        comment => ({ ...comment, isExpanded: newExpandedState }),
         prevComments
-      )
-    );
-  }, [updateCommentInTree]);
+      );
+    });
+  }, [updateCommentInTree, findCommentById, storyId]);
 
   // Function to load children for a comment
   const loadCommentChildren = useCallback(async (commentId: number) => {
@@ -192,10 +225,13 @@ export const useStoryWithComments = (storyId: number) => {
           // Skip if null or deleted
           if (!childComment) continue;
           
-          // Transform to add UI state
+          // Check localStorage for saved state
+          const savedExpanded = getStoredCommentState(storyId, kidId);
+          
+          // Transform to add UI state - use saved state or default to true
           const childWithState = {
             ...childComment,
-            isExpanded: true,
+            isExpanded: savedExpanded !== null ? savedExpanded : true,
             childrenLoaded: false,
             children: []
           };
