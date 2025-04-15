@@ -1,394 +1,401 @@
 /* App Styles */
 
 a {
-  color: var(--link-color);
-  text-decoration: none;
+    color: var(--link-color);
+    text-decoration: none;
 }
 
 a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 a:visited {
-  color: var(--link-visited);
+    color: var(--link-visited);
 }
 
 .app {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 8px;
-  min-height: 100vh;
-  background-color: var(--background-color);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 8px;
+    min-height: 100vh;
+    background-color: var(--background-color);
 }
 
 /* Header */
 .app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 8px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .app-title {
-  font-size: 20px;
-  font-weight: bold;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .app-title a {
-  color: var(--hn-orange);
-  text-decoration: none;
+    color: var(--hn-orange);
+    text-decoration: none;
 }
 
 .app-title a:hover {
-  text-decoration: none;
+    text-decoration: none;
 }
 
 .app-title a:visited {
-  color: var(--hn-orange);
+    color: var(--hn-orange);
 }
 
 .theme-toggle {
-  background: none;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  color: var(--text-color);
-  padding: 5px 10px;
-  cursor: pointer;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    padding: 5px 10px;
+    cursor: pointer;
 }
 
 .theme-toggle:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Footer */
 .app-footer {
-  margin-top: 40px;
-  padding-top: 15px;
-  border-top: 1px solid var(--border-color);
-  text-align: center;
-  color: var(--light-text);
-  font-size: 14px;
+    margin-top: 40px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    color: var(--light-text);
+    font-size: 14px;
 }
 
 /* Story list */
 .stories-list {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .story-container {
-  display: flex;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border-color);
+    display: flex;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .story-index {
-  color: var(--light-text);
-  min-width: 30px;
-  font-size: 14px;
-  padding-top: 4px;
-  text-align: right;
-  padding-right: 8px;
+    color: var(--light-text);
+    min-width: 30px;
+    font-size: 14px;
+    padding-top: 4px;
+    text-align: right;
+    padding-right: 8px;
 }
 
 .story-item {
-  flex: 1;
-  cursor: pointer;
-  /* Replaces py-1, px-2, -mx-2, rounded-md */
-  padding: 0.25rem 0.5rem; 
-  margin: 0 -0.5rem; 
-  border-radius: 0.375rem; 
+    flex: 1;
+    cursor: pointer;
+    /* Replaces py-1, px-2, -mx-2, rounded-md */
+    padding: 0.25rem 0.5rem;
+    margin: 0 -0.5rem;
+    border-radius: 0.375rem;
 }
 
 .story-item:hover {
-  /* Replicates hover effect */
-  background-color: rgba(0, 0, 0, 0.02);
+    /* Replicates hover effect */
+    background-color: rgba(0, 0, 0, 0.02);
 }
 
 /* Styles for pinned stories */
 .pinned-story {
-  /* No background color here, moved to container */
+    /* No background color here, moved to container */
 }
 
 /* Styles for visited stories */
 .visited-story {
-  opacity: 0.7;
+    opacity: 0.7;
 }
 
 .visited-story .story-title a {
-  color: var(--link-visited);
+    color: var(--link-visited);
 }
 
 .story-title {
-  /* Replaces mb-1 */
-  font-size: 15px;
-  margin-bottom: 0.125rem; 
-  font-weight: 500;
+    /* Replaces mb-1 */
+    font-size: 15px;
+    margin-bottom: 0.125rem;
+    font-weight: 500;
 }
 
 .story-title-row {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 /* Pin button styling */
 .pin-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 2px 4px;
-  margin-right: 8px;
-  font-size: 14px;
-  opacity: 0.6;
-  transition: all 0.1s ease-in-out;
-  border-radius: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    margin-right: 8px;
+    font-size: 14px;
+    opacity: 0.6;
+    transition: all 0.1s ease-in-out;
+    border-radius: 3px;
 }
 
 .pin-button:hover {
-  opacity: 1;
-  background-color: rgba(0, 0, 0, 0.05);
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .pin-button.pinned {
-  opacity: 1;
-  color: var(--hn-orange);
-  transform: scale(1.1);
+    opacity: 1;
+    color: var(--hn-orange);
+    transform: scale(1.1);
 }
 
 /* Style for the story title link */
 .story-title a {
-  /* Replaces text-gray-900 dark:text-gray-100 */
-  color: var(--text-color); 
-  text-decoration: none;
+    /* Replaces text-gray-900 dark:text-gray-100 */
+    color: var(--text-color);
+    text-decoration: none;
 }
 
 .story-title a:hover {
-  /* Replaces hover:underline */
-  text-decoration: underline;
+    /* Replaces hover:underline */
+    text-decoration: underline;
 }
 
 .story-domain {
-  /* Replaces text-xs text-gray-500 dark:text-gray-400 ml-1 */
-  color: var(--light-text);
-  font-size: 12px; /* Equivalent to text-xs */
-  margin-left: 0.25rem; /* Equivalent to ml-1 */
+    /* Replaces text-xs text-gray-500 dark:text-gray-400 ml-1 */
+    color: var(--light-text);
+    font-size: 12px; /* Equivalent to text-xs */
+    margin-left: 0.25rem; /* Equivalent to ml-1 */
 }
 
 .story-info {
-  /* Replaces flex flex-wrap text-xs text-gray-500 dark:text-gray-400 */
-  /* Replaces flex flex-wrap text-xs text-gray-500 dark:text-gray-400 */
-  font-size: 11px; /* Equivalent to text-xs */
-  color: var(--light-text);
-  display: flex;
-  gap: 0.35rem; /* Tighter spacing between info items */
-  flex-wrap: wrap;
+    /* Replaces flex flex-wrap text-xs text-gray-500 dark:text-gray-400 */
+    /* Replaces flex flex-wrap text-xs text-gray-500 dark:text-gray-400 */
+    font-size: 11px; /* Equivalent to text-xs */
+    color: var(--light-text);
+    display: flex;
+    gap: 0.35rem; /* Tighter spacing between info items */
+    flex-wrap: wrap;
 }
 
 /* Style for the comments link within story-info */
 .story-comments-link {
-  /* Replaces hover:underline cursor-auto */
-  color: var(--light-text); /* Inherit color */
-  text-decoration: none;
-  cursor: pointer; /* Make it clear it's clickable */
+    /* Replaces hover:underline cursor-auto */
+    color: var(--light-text); /* Inherit color */
+    text-decoration: none;
+    cursor: pointer; /* Make it clear it's clickable */
 }
 
 .story-comments-link:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 /* Style for the pin link within story-info */
 .pin-link {
-  color: var(--light-text);
-  text-decoration: none;
-  cursor: pointer;
+    color: var(--light-text);
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .pin-link:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 .pin-link.pinned {
-  color: var(--hn-orange);
+    color: var(--hn-orange);
 }
-
 
 /* Navigation */
 .stories-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .stories-nav {
-  display: flex;
-  gap: 10px;
+    display: flex;
+    gap: 10px;
 }
 
 .stories-nav a {
-  color: var(--hn-orange);
-  font-size: 14px;
-  font-weight: 500;
+    color: var(--hn-orange);
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .page-info {
-  font-size: 14px;
-  color: var(--light-text);
+    font-size: 14px;
+    color: var(--light-text);
 }
 
 .stories-controls-bottom {
-  margin-top: 10px;
+    margin-top: 10px;
 }
 
 /* Story page */
 .back-button {
-  background: none;
-  border: none;
-  color: var(--link-color);
-  cursor: pointer;
-  font-size: 14px;
-  margin-bottom: 20px;
-  padding: 0;
-  display: flex;
-  align-items: center;
+    background: none;
+    border: none;
+    color: var(--link-color);
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 20px;
+    padding: 0;
+    display: flex;
+    align-items: center;
 }
 
 .back-button:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 .story-details {
-  padding: 12px;
-  background-color: var(--card-background);
-  border-radius: 4px;
-  margin-bottom: 15px;
-  border: 1px solid var(--border-color);
+    padding: 12px;
+    background-color: var(--card-background);
+    border-radius: 4px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
 }
 
 .story-details h1 {
-  font-size: 18px;
-  margin-bottom: 8px;
-  line-height: 1.25;
+    font-size: 18px;
+    margin-bottom: 8px;
+    line-height: 1.25;
 }
 
 .story-url {
-  margin-bottom: 6px;
-  font-size: 12px;
+    margin-bottom: 6px;
+    font-size: 12px;
 }
 
 .story-meta {
-  font-size: 11px;
-  color: var(--light-text);
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 4px;
+    font-size: 11px;
+    color: var(--light-text);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
 }
 
 /* Comments */
 .comments-section h2 {
-  font-size: 16px;
-  margin-bottom: 12px;
+    font-size: 16px;
+    margin-bottom: 12px;
 }
 
 .comments-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
 }
 
 .comment {
-  padding: 8px;
-  border-bottom: 1px solid var(--border-color);
-  background-color: var(--comment-background);
-  margin-bottom: 1px;
-  border-radius: 3px;
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--comment-background);
+    margin-bottom: 1px;
+    border-radius: 3px;
 }
 
 /* Indentation for comments, capped at level 4 */
-.comment-indent-1 { margin-left: 6px; }
-.comment-indent-2 { margin-left: 12px; }
-.comment-indent-3 { margin-left: 18px; }
-.comment-indent-4 { margin-left: 24px; }
+.comment-indent-1 {
+    margin-left: 6px;
+}
+.comment-indent-2 {
+    margin-left: 12px;
+}
+.comment-indent-3 {
+    margin-left: 18px;
+}
+.comment-indent-4 {
+    margin-left: 24px;
+}
 
 .deeply-nested {
-  border-left: 2px solid var(--hn-orange);
-  /* Apply max indent margin if deeply nested */
-  margin-left: 24px !important; 
+    border-left: 2px solid var(--hn-orange);
+    /* Apply max indent margin if deeply nested */
+    margin-left: 24px !important;
 }
 
 .comment-header {
-  font-size: 11px;
-  color: var(--light-text);
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+    font-size: 11px;
+    color: var(--light-text);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .comment-author {
-  font-weight: bold;
-  color: var(--text-color);
+    font-weight: bold;
+    color: var(--text-color);
 }
 
 .comment-content {
-  font-size: 13px;
-  line-height: 1.4;
-  overflow-wrap: break-word;
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
 }
 
 .comment-content a {
-  color: var(--hn-orange);
+    color: var(--hn-orange);
 }
 
 .comment-content p {
-  margin-bottom: 6px;
+    margin-bottom: 6px;
 }
 
-.comment-content pre, 
+.comment-content pre,
 .comment-content code {
-  background-color: rgba(0, 0, 0, 0.1);
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-family: monospace;
-  font-size: 13px;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 13px;
 }
 
 .comment-toggle {
-  background: none;
-  border: none;
-  color: var(--hn-orange);
-  cursor: pointer;
-  font-size: 12px;
-  padding: 0;
-  margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--hn-orange);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    margin-left: auto;
 }
 
 .load-more-button {
-  background: none;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  color: var(--light-text);
-  cursor: pointer;
-  font-size: 12px;
-  margin-top: 10px;
-  padding: 5px 10px;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--light-text);
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 10px;
+    padding: 5px 10px;
 }
 
 .load-more-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .load-more-button.loading {
-  cursor: default;
-  opacity: 0.7;
+    cursor: default;
+    opacity: 0.7;
 }
 
 .comment-deleted {
-  color: var(--light-text);
-  font-style: italic;
+    color: var(--light-text);
+    font-style: italic;
 }
 
 /* Loading states */
@@ -398,51 +405,51 @@ a:visited {
 .loading-comments,
 .loading-more-comments,
 .loading-more {
-  text-align: center;
-  padding: 15px 0;
-  color: var(--light-text);
-  font-style: italic;
-  font-size: 14px;
+    text-align: center;
+    padding: 15px 0;
+    color: var(--light-text);
+    font-style: italic;
+    font-size: 14px;
 }
 
 .loading,
 .error {
-  padding: 40px 0;
+    padding: 40px 0;
 }
 
 .error {
-  color: #e05151;
+    color: #e05151;
 }
 
 /* Pinned count styling */
 .pinned-count {
-  color: var(--hn-orange);
-  font-weight: 500;
+    color: var(--hn-orange);
+    font-weight: 500;
 }
 
 /* Pinned container styling */
 .pinned-container {
-  position: relative;
-  background-color: rgba(255, 102, 0, 0.08);
+    position: relative;
+    background-color: rgba(255, 102, 0, 0.08);
 }
 
 /* Using container background color and pin/unpin text for pinned stories */
 
 /* Media queries for responsive design */
 @media (max-width: 768px) {
-  .app {
-    padding: 5px;
-  }
-  
-  .story-details {
-    padding: 8px;
-  }
-  
-  .comment {
-    padding: 6px 5px;
-  }
-  
-  .page-range {
-    display: none;
-  }
+    .app {
+        padding: 5px;
+    }
+
+    .story-details {
+        padding: 8px;
+    }
+
+    .comment {
+        padding: 6px 5px;
+    }
+
+    .page-range {
+        display: none;
+    }
 }
