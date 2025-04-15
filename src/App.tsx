@@ -38,22 +38,29 @@ function StoriesRoute() {
   const currentPage = pageParam ? parseInt(pageParam, 10) : 0;
 
   const handleStorySelect = (id: number) => {
-    // Import is problematic (circular), so access localStorage directly 
+    // Import is problematic (circular), so access localStorage directly
     try {
-      const visitedStories = JSON.parse(localStorage.getItem('hn-visited-stories') || '[]');
+      const visitedStories = JSON.parse(
+        localStorage.getItem("hn-visited-stories") || "[]",
+      );
       if (!visitedStories.includes(id)) {
         visitedStories.push(id);
-        localStorage.setItem('hn-visited-stories', JSON.stringify(visitedStories));
-        
+        localStorage.setItem(
+          "hn-visited-stories",
+          JSON.stringify(visitedStories),
+        );
+
         // Dispatch a storage event so other components can react to this change
-        window.dispatchEvent(new StorageEvent('storage', {
-          key: 'hn-visited-stories'
-        }));
+        window.dispatchEvent(
+          new StorageEvent("storage", {
+            key: "hn-visited-stories",
+          }),
+        );
       }
     } catch (e) {
-      console.error('Error saving visited story to localStorage:', e);
+      console.error("Error saving visited story to localStorage:", e);
     }
-    
+
     navigate(`/story/${id}`);
   };
 
@@ -114,8 +121,20 @@ function App() {
       <footer className="app-footer">
         <p>
           Powered by{" "}
-          <a href="https://github.com/HackerNews/API" rel="noopener noreferrer">
+          <a
+            href="https://github.com/HackerNews/API"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Hacker News API
+          </a>
+          {" | "}
+          <a
+            href="https://github.com/ashish01/hn-reader"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
           </a>
         </p>
       </footer>
