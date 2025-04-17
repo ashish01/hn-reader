@@ -1,6 +1,7 @@
 import React from "react";
 import useStoryWithComments from "../hooks/useStoryWithComments";
 import Comment from "./Comment";
+import { getDomain } from "tldts";
 
 interface StoryPageProps {
   storyId: number;
@@ -23,7 +24,7 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId, onBack }) => {
     if (!url) return "";
 
     try {
-      const domain = new URL(url).hostname.replace("www.", "");
+      const domain = getDomain(url, { allowPrivateDomains: true });
       return domain;
     } catch {
       return "";

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Story } from "../types";
+import { getDomain } from "tldts";
 
 interface StoryItemProps {
   story: Story;
@@ -7,10 +8,14 @@ interface StoryItemProps {
   onTogglePin?: (story: Story) => void;
 }
 
-const StoryItem: React.FC<StoryItemProps> = ({ story: initialStory, onClick, onTogglePin }) => {
+const StoryItem: React.FC<StoryItemProps> = ({
+  story: initialStory,
+  onClick,
+  onTogglePin,
+}) => {
   // Use local state to track visited status for immediate UI updates
   const [story, setStory] = useState<Story>(initialStory);
-  
+
   // Update local state when prop changes
   React.useEffect(() => {
     setStory(initialStory);
@@ -39,37 +44,44 @@ const StoryItem: React.FC<StoryItemProps> = ({ story: initialStory, onClick, onT
     e.stopPropagation();
     if (onTogglePin) {
       // Update local state first for immediate feedback
-      setStory(prevStory => ({
+      setStory((prevStory) => ({
         ...prevStory,
-        pinned: !prevStory.pinned
+        pinned: !prevStory.pinned,
       }));
-      
+
       // Then update storage through the parent
       onTogglePin(story);
     }
   };
-  
+
   const handleUrlClick = () => {
     // Import would create a circular dependency, so we access directly
     try {
-      const visitedStories = JSON.parse(localStorage.getItem('hn-visited-stories') || '[]');
+      const visitedStories = JSON.parse(
+        localStorage.getItem("hn-visited-stories") || "[]",
+      );
       if (!visitedStories.includes(story.id)) {
         visitedStories.push(story.id);
-        localStorage.setItem('hn-visited-stories', JSON.stringify(visitedStories));
-        
+        localStorage.setItem(
+          "hn-visited-stories",
+          JSON.stringify(visitedStories),
+        );
+
         // Update local state for immediate UI update
-        setStory(prevStory => ({
+        setStory((prevStory) => ({
           ...prevStory,
-          visited: true
+          visited: true,
         }));
-        
+
         // Dispatch a storage event so other components can react to this change
-        window.dispatchEvent(new StorageEvent('storage', {
-          key: 'hn-visited-stories'
-        }));
+        window.dispatchEvent(
+          new StorageEvent("storage", {
+            key: "hn-visited-stories",
+          }),
+        );
       }
     } catch (e) {
-      console.error('Error saving visited story to localStorage:', e);
+      console.error("Error saving visited story to localStorage:", e);
     }
   };
 
@@ -78,7 +90,7 @@ const StoryItem: React.FC<StoryItemProps> = ({ story: initialStory, onClick, onT
     if (!url) return "";
 
     try {
-      const domain = new URL(url).hostname.replace("www.", "");
+      const domain = getDomain(url, { allowPrivateDomains: true });
       return domain;
     } catch {
       return "";
@@ -132,7 +144,7 @@ const StoryItem: React.FC<StoryItemProps> = ({ story: initialStory, onClick, onT
         </a>
         {onTogglePin && (
           <a
-            className={`pin-link ${story.pinned ? 'pinned' : ''}`}
+            className={`pin-link ${story.pinned ? "pinned" : ""}`}
             onClick={handlePinClick}
             role="button"
             tabIndex={0}
@@ -141,9 +153,11 @@ const StoryItem: React.FC<StoryItemProps> = ({ story: initialStory, onClick, onT
                 e.preventDefault();
                 // Create a synthetic event object with just stopPropagation
                 const syntheticEvent = {
-                  stopPropagation: () => {}
+                  stopPropagation: () => {},
                 };
-                handlePinClick(syntheticEvent as React.MouseEvent<HTMLAnchorElement>);
+                handlePinClick(
+                  syntheticEvent as React.MouseEvent<HTMLAnchorElement>,
+                );
               }
             }}
           >
