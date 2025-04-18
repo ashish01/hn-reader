@@ -289,47 +289,44 @@ a:visited {
 /* Comments */
 .comments-section h2 {
     font-size: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .comments-list {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 0;
 }
 
 .comment {
-    padding: 8px;
+    padding: 4px 0 8px 0;
     border-bottom: 1px solid var(--border-color);
-    background-color: var(--comment-background);
-    margin-bottom: 1px;
-    border-radius: 3px;
+    margin-bottom: 2px;
+    border-radius: 0;
 }
 
 /* Indentation for comments, capped at level 4 */
 .comment-indent-1 {
-    margin-left: 6px;
+    margin-left: 15px;
 }
 .comment-indent-2 {
-    margin-left: 12px;
+    margin-left: 30px;
 }
 .comment-indent-3 {
-    margin-left: 18px;
+    margin-left: 45px;
 }
 .comment-indent-4 {
-    margin-left: 24px;
+    margin-left: 60px;
 }
 
 .deeply-nested {
-    border-left: 2px solid var(--hn-orange);
-    /* Apply max indent margin if deeply nested */
-    margin-left: 24px !important;
+    margin-left: 60px !important;
 }
 
 .comment-header {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--light-text);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -342,8 +339,9 @@ a:visited {
 
 .comment-content {
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.5;
     overflow-wrap: break-word;
+    margin-top: 0;
 }
 
 .comment-content a {
@@ -351,27 +349,32 @@ a:visited {
 }
 
 .comment-content p {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    margin-top: 0;
 }
 
 .comment-content pre,
 .comment-content code {
     white-space: pre-wrap;
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.05);
     padding: 2px 4px;
     border-radius: 3px;
     font-family: monospace;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .comment-toggle {
     background: none;
     border: none;
-    color: var(--hn-orange);
+    color: var(--light-text);
     cursor: pointer;
     font-size: 12px;
     padding: 0;
     margin-left: auto;
+}
+
+.comment-toggle:hover {
+    color: var(--hn-orange);
 }
 
 .load-more-button {
@@ -387,6 +390,7 @@ a:visited {
 
 .load-more-button:hover {
     background-color: rgba(0, 0, 0, 0.05);
+    color: var(--hn-orange);
 }
 
 .load-more-button.loading {
@@ -397,6 +401,7 @@ a:visited {
 .comment-deleted {
     color: var(--light-text);
     font-style: italic;
+    font-size: 13px;
 }
 
 /* Loading states */
@@ -407,10 +412,10 @@ a:visited {
 .loading-more-comments,
 .loading-more {
     text-align: center;
-    padding: 15px 0;
+    padding: 12px 0;
     color: var(--light-text);
     font-style: italic;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .loading,
