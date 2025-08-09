@@ -113,13 +113,33 @@ const StoryItem: React.FC<StoryItemProps> = ({
     <div className={getStoryItemClass()}>
       <div className="story-title">
         <div className="story-title-row">
-          <a
-            href={story.url}
-            rel="noopener noreferrer"
-            onClick={handleUrlClick}
-          >
-            {story.title}
-          </a>
+          {story.url ? (
+            <a
+              href={story.url}
+              rel="noopener noreferrer"
+              onClick={handleUrlClick}
+            >
+              {story.title}
+            </a>
+          ) : (
+            <a
+              onClick={(e) => {
+                e.preventDefault();
+                handleClick();
+              }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleClick();
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              {story.title}
+            </a>
+          )}
           {story.url && (
             <span className="story-domain">({formatUrl(story.url)})</span>
           )}
