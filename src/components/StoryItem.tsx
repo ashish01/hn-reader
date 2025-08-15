@@ -151,10 +151,13 @@ const StoryItem: React.FC<StoryItemProps> = ({
         <span>{formatTime(story.time)}</span>
         <a
           className="story-comments-link"
-          href={`/story/${story.id}`}
-          onClick={(e) => {
-            e.preventDefault();
-            handleClick();
+          onClick={handleClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              handleClick();
+            }
           }}
         >
           {story.descendants || 0} comments
@@ -162,10 +165,20 @@ const StoryItem: React.FC<StoryItemProps> = ({
         {onTogglePin && (
           <a
             className={`pin-link ${story.pinned ? "pinned" : ""}`}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              handlePinClick(e);
+            onClick={handlePinClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                // Create a synthetic event object with just stopPropagation
+                const syntheticEvent = {
+                  stopPropagation: () => {},
+                };
+                handlePinClick(
+                  syntheticEvent as React.MouseEvent<HTMLAnchorElement>,
+                );
+              }
             }}
           >
             {story.pinned ? "unpin" : "pin"}
