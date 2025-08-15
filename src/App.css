@@ -198,6 +198,10 @@ a:visited {
     text-decoration: underline;
 }
 
+.story-comments-link:visited {
+    color: var(--link-visited);
+}
+
 /* Style for the pin link within story-info */
 .pin-link {
     color: var(--light-text);
