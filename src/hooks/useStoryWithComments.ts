@@ -110,16 +110,19 @@ export const useStoryWithComments = (storyId: number) => {
           return;
         }
         
-        // Fetch each comment individually to show them as they load
-        const commentPromises = fetchedStory.kids.map(async (kidId) => {
+        // Initialize comments array with placeholders to maintain order
+        const commentsMap = new Map<number, CommentWithChildren>();
+
+        // Fetch all comments in parallel
+        const commentPromises = fetchedStory.kids.map(async (kidId, index) => {
           try {
             const comment = await getComment(kidId);
-            
-            if (!isMounted) return null;
-            
+
+            if (!isMounted) return;
+
             // Check localStorage for saved state
             const savedExpanded = getStoredCommentState(storyId, kidId);
-            
+
             // Add UI state properties - use saved state or default to true
             const commentWithState = {
               ...comment,
@@ -127,31 +130,26 @@ export const useStoryWithComments = (storyId: number) => {
               childrenLoaded: false,
               children: []
             };
-            
-            // Update the comments state with this new comment
-            setComments(prevComments => {
-              const newComments = [...prevComments];
-              // Find the index of this comment if it exists already
-              const existingIndex = newComments.findIndex(c => c.id === comment.id);
-              
-              if (existingIndex >= 0) {
-                // Update existing comment
-                newComments[existingIndex] = commentWithState;
-              } else {
-                // Add new comment
-                newComments.push(commentWithState);
+
+            // Store in map with original index
+            commentsMap.set(index, commentWithState);
+
+            // Update comments in order as they arrive
+            setComments(() => {
+              const orderedComments: CommentWithChildren[] = [];
+              for (let i = 0; i < fetchedStory.kids.length; i++) {
+                const comment = commentsMap.get(i);
+                if (comment) {
+                  orderedComments.push(comment);
+                }
               }
-              
-              return newComments;
+              return orderedComments;
             });
-            
-            return commentWithState;
           } catch (err) {
             console.error(`Error fetching comment ${kidId}:`, err);
-            return null;
           }
         });
-        
+
         // Wait for all comments to complete
         await Promise.all(commentPromises);
         
@@ -216,18 +214,21 @@ export const useStoryWithComments = (storyId: number) => {
       
       // Get the children IDs
       const kidIds = commentToUpdate.kids || [];
-      
-      // Load each child comment individually
-      for (const kidId of kidIds) {
+
+      // Map to track children by their original index
+      const childrenMap = new Map<number, CommentWithChildren>();
+
+      // Fetch all children in parallel
+      const childPromises = kidIds.map(async (kidId, index) => {
         try {
           const childComment = await getComment(kidId);
-          
+
           // Skip if null or deleted
-          if (!childComment) continue;
-          
+          if (!childComment) return;
+
           // Check localStorage for saved state
           const savedExpanded = getStoredCommentState(storyId, kidId);
-          
+
           // Transform to add UI state - use saved state or default to true
           const childWithState = {
             ...childComment,
@@ -235,28 +236,25 @@ export const useStoryWithComments = (storyId: number) => {
             childrenLoaded: false,
             children: []
           };
-          
-          // Add this child to the parent's children array
-          setComments(prevComments => 
+
+          // Store in map with original index
+          childrenMap.set(index, childWithState);
+
+          // Update children in order as they arrive
+          setComments(prevComments =>
             updateCommentInTree(
               commentId,
               comment => {
-                const existingChildren = comment.children || [];
-                const existingIndex = existingChildren.findIndex(c => c.id === childComment.id);
-                
-                let newChildren;
-                if (existingIndex >= 0) {
-                  // Update existing child
-                  newChildren = [...existingChildren];
-                  newChildren[existingIndex] = childWithState;
-                } else {
-                  // Add new child
-                  newChildren = [...existingChildren, childWithState];
+                const orderedChildren: CommentWithChildren[] = [];
+                for (let i = 0; i < kidIds.length; i++) {
+                  const child = childrenMap.get(i);
+                  if (child) {
+                    orderedChildren.push(child);
+                  }
                 }
-                
                 return {
                   ...comment,
-                  children: newChildren
+                  children: orderedChildren
                 };
               },
               prevComments
@@ -265,7 +263,10 @@ export const useStoryWithComments = (storyId: number) => {
         } catch (err) {
           console.error(`Error loading comment ${kidId}:`, err);
         }
-      }
+      });
+
+      // Wait for all children to complete
+      await Promise.all(childPromises);
       
       // Mark as finished loading
       setComments(prevComments => 
