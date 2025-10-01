@@ -128,13 +128,21 @@ a:visited {
 }
 
 /* Style for the story title link */
-.story-title a {
+.story-title a,
+.story-title-button {
     /* Replaces text-gray-900 dark:text-gray-100 */
     color: var(--text-color);
     text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
 }
 
-.story-title a:hover {
+.story-title a:hover,
+.story-title-button:hover {
     /* Replaces hover:underline */
     text-decoration: underline;
 }
@@ -163,6 +171,10 @@ a:visited {
     color: var(--light-text); /* Inherit color */
     text-decoration: none;
     cursor: pointer; /* Make it clear it's clickable */
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
 }
 
 .story-comments-link:hover {
@@ -182,10 +194,22 @@ a:visited {
     gap: 10px;
 }
 
-.stories-nav a {
+.stories-nav a,
+.stories-nav button {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
     color: var(--hn-orange);
     font-size: 14px;
     font-weight: 500;
+    text-decoration: none;
+}
+
+.stories-nav a:hover,
+.stories-nav button:hover {
+    text-decoration: underline;
 }
 
 .page-info {

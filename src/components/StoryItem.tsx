@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Story } from "../types";
-import { getDomain } from "tldts";
+import { formatTime, formatUrl } from "../utils/formatters";
+import { markStoryAsVisited } from "../utils/visitedStories";
 
 interface StoryItemProps {
   story: Story;
@@ -8,77 +9,15 @@ interface StoryItemProps {
 }
 
 const StoryItem: React.FC<StoryItemProps> = ({
-  story: initialStory,
+  story,
   onClick,
 }) => {
-  // Use local state to track visited status for immediate UI updates
-  const [story, setStory] = useState<Story>(initialStory);
-
-  // Update local state when prop changes
-  React.useEffect(() => {
-    setStory(initialStory);
-  }, [initialStory]);
-  // Format the time as a relative time string
-  const formatTime = (time: number | undefined) => {
-    if (!time) return "";
-
-    const date = new Date(time * 1000);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-  };
-
   const handleClick = () => {
     onClick(story.id);
   };
 
   const handleUrlClick = () => {
-    // Import would create a circular dependency, so we access directly
-    try {
-      const visitedStories = JSON.parse(
-        localStorage.getItem("hn-visited-stories") || "[]",
-      );
-      if (!visitedStories.includes(story.id)) {
-        visitedStories.push(story.id);
-        localStorage.setItem(
-          "hn-visited-stories",
-          JSON.stringify(visitedStories),
-        );
-
-        // Update local state for immediate UI update
-        setStory((prevStory) => ({
-          ...prevStory,
-          visited: true,
-        }));
-
-        // Dispatch a storage event so other components can react to this change
-        window.dispatchEvent(
-          new StorageEvent("storage", {
-            key: "hn-visited-stories",
-          }),
-        );
-      }
-    } catch (e) {
-      console.error("Error saving visited story to localStorage:", e);
-    }
-  };
-
-  // Format the URL to display just the domain
-  const formatUrl = (url: string | undefined) => {
-    if (!url) return "";
-
-    try {
-      const domain = getDomain(url, { allowPrivateDomains: true });
-      return domain;
-    } catch {
-      return "";
-    }
+    markStoryAsVisited(story.id);
   };
 
   // Determine the appropriate class based on visited status
@@ -103,23 +42,9 @@ const StoryItem: React.FC<StoryItemProps> = ({
               {story.title}
             </a>
           ) : (
-            <a
-              onClick={(e) => {
-                e.preventDefault();
-                handleClick();
-              }}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleClick();
-                }
-              }}
-              style={{ cursor: 'pointer' }}
-            >
+            <button onClick={handleClick} className="story-title-button">
               {story.title}
-            </a>
+            </button>
           )}
           {story.url && (
             <span className="story-domain">({formatUrl(story.url)})</span>
@@ -130,19 +55,9 @@ const StoryItem: React.FC<StoryItemProps> = ({
         <span>{story.score} points</span>
         <span>by {story.by}</span>
         <span>{formatTime(story.time)}</span>
-        <a
-          className="story-comments-link"
-          onClick={handleClick}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              handleClick();
-            }
-          }}
-        >
+        <button className="story-comments-link" onClick={handleClick}>
           {story.descendants || 0} comments
-        </a>
+        </button>
       </div>
     </div>
   );

@@ -1,35 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getTopStories, getStory } from '../api/hackernews';
 import { Story } from '../types';
+import { getVisitedStories } from '../utils/visitedStories';
+import { STORIES_PER_PAGE, TOTAL_STORIES_TO_FETCH } from '../utils/constants';
 
-// Keys for localStorage
 const VISITED_STORIES_KEY = 'hn-visited-stories';
 
-// Helper function to get visited stories from localStorage
-const getVisitedStories = (): number[] => {
-  try {
-    const visitedString = localStorage.getItem(VISITED_STORIES_KEY);
-    return visitedString ? JSON.parse(visitedString) : [];
-  } catch (e) {
-    console.error('Error reading visited stories from localStorage:', e);
-    return [];
-  }
-};
-
-// Helper function to save visited story
-export const markStoryAsVisited = (storyId: number): void => {
-  try {
-    const visitedStories = getVisitedStories();
-    if (!visitedStories.includes(storyId)) {
-      visitedStories.push(storyId);
-      localStorage.setItem(VISITED_STORIES_KEY, JSON.stringify(visitedStories));
-    }
-  } catch (e) {
-    console.error('Error saving visited story to localStorage:', e);
-  }
-};
-
-export const useStories = (page: number = 0, itemsPerPage: number = 30) => {
+export const useStories = (page: number = 0, itemsPerPage: number = STORIES_PER_PAGE) => {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -72,7 +49,7 @@ export const useStories = (page: number = 0, itemsPerPage: number = 30) => {
         setStories([]); // Clear previous stories
 
         // Get all story IDs first
-        const allStoryIds = await getTopStories(500); // Get a larger set to support pagination
+        const allStoryIds = await getTopStories(TOTAL_STORIES_TO_FETCH); // Get a larger set to support pagination
 
         if (!isMounted) return;
         setTotalStories(allStoryIds.length);

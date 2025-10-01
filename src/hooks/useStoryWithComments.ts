@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getStory, getComment } from '../api/hackernews';
 import { Story, Comment } from '../types';
-import { markStoryAsVisited } from './useStories';
+import { markStoryAsVisited } from '../utils/visitedStories';
 
 interface CommentWithChildren extends Comment {
   children?: CommentWithChildren[];

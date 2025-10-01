@@ -1,7 +1,7 @@
 import React from "react";
 import useStoryWithComments from "../hooks/useStoryWithComments";
 import Comment from "./Comment";
-import { getDomain } from "tldts";
+import { formatTime, formatUrl } from "../utils/formatters";
 
 interface StoryPageProps {
   storyId: number;
@@ -18,34 +18,6 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId, onBack }) => {
     toggleComment,
     loadCommentChildren,
   } = useStoryWithComments(storyId);
-
-  // Format the URL to display just the domain
-  const formatUrl = (url: string | undefined) => {
-    if (!url) return "";
-
-    try {
-      const domain = getDomain(url, { allowPrivateDomains: true });
-      return domain;
-    } catch {
-      return "";
-    }
-  };
-
-  // Format the time as a relative time string
-  const formatTime = (time: number | undefined) => {
-    if (!time) return "";
-
-    const date = new Date(time * 1000);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-  };
 
   if (loading && !story) {
     return <div className="loading">Loading story...</div>;

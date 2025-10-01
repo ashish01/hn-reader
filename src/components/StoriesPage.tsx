@@ -1,6 +1,7 @@
 import React from 'react';
 import StoryItem from './StoryItem';
 import useStories from '../hooks/useStories';
+import { STORIES_PER_PAGE } from '../utils/constants';
 
 interface StoriesPageProps {
   onStorySelect: (id: number) => void;
@@ -23,7 +24,7 @@ const StoriesPage: React.FC<StoriesPageProps> = ({
   } = useStories(page);
 
   // Calculate the starting index for the current page
-  const startIndex = currentPage * 30;
+  const startIndex = currentPage * STORIES_PER_PAGE;
 
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -50,17 +51,11 @@ const StoriesPage: React.FC<StoriesPageProps> = ({
       <div className="stories-controls">
         <div className="stories-nav">
           {currentPage > 0 && (
-            <a href="#" onClick={(e) => {
-              e.preventDefault();
-              handlePrevPage();
-            }}>← Previous</a>
+            <button onClick={handlePrevPage}>← Previous</button>
           )}
-          
+
           {currentPage < totalPages - 1 && (
-            <a href="#" onClick={(e) => {
-              e.preventDefault();
-              handleNextPage();
-            }}>Next →</a>
+            <button onClick={handleNextPage}>Next →</button>
           )}
         </div>
         
@@ -68,7 +63,7 @@ const StoriesPage: React.FC<StoriesPageProps> = ({
           {loading && stories.length === 0 ? 'Loading stories...' : (
             <>
               Page {currentPage + 1} of {totalPages}
-              <span className="page-range"> (stories {startIndex + 1}-{startIndex + Math.min(stories.length, 30)} of {totalStories})</span>
+              <span className="page-range"> (stories {startIndex + 1}-{startIndex + Math.min(stories.length, STORIES_PER_PAGE)} of {totalStories})</span>
             </>
           )}
         </div>
@@ -102,17 +97,11 @@ const StoriesPage: React.FC<StoriesPageProps> = ({
         <div className="stories-controls stories-controls-bottom">
           <div className="stories-nav">
             {currentPage > 0 && (
-              <a href="#" onClick={(e) => {
-                e.preventDefault();
-                handlePrevPage();
-              }}>← Previous</a>
+              <button onClick={handlePrevPage}>← Previous</button>
             )}
-            
+
             {currentPage < totalPages - 1 && (
-              <a href="#" onClick={(e) => {
-                e.preventDefault();
-                handleNextPage();
-              }}>Next →</a>
+              <button onClick={handleNextPage}>Next →</button>
             )}
           </div>
         </div>
