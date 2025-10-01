@@ -5,13 +5,11 @@ import { getDomain } from "tldts";
 interface StoryItemProps {
   story: Story;
   onClick: (id: number) => void;
-  onTogglePin?: (story: Story) => void;
 }
 
 const StoryItem: React.FC<StoryItemProps> = ({
   story: initialStory,
   onClick,
-  onTogglePin,
 }) => {
   // Use local state to track visited status for immediate UI updates
   const [story, setStory] = useState<Story>(initialStory);
@@ -38,20 +36,6 @@ const StoryItem: React.FC<StoryItemProps> = ({
 
   const handleClick = () => {
     onClick(story.id);
-  };
-
-  const handlePinClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onTogglePin) {
-      // Update local state first for immediate feedback
-      setStory((prevStory) => ({
-        ...prevStory,
-        pinned: !prevStory.pinned,
-      }));
-
-      // Then update storage through the parent
-      onTogglePin(story);
-    }
   };
 
   const handleUrlClick = () => {
@@ -97,14 +81,11 @@ const StoryItem: React.FC<StoryItemProps> = ({
     }
   };
 
-  // Determine the appropriate class based on visited and pinned status
+  // Determine the appropriate class based on visited status
   const getStoryItemClass = () => {
     let className = "story-item";
-    if (story.visited && !story.pinned) {
+    if (story.visited) {
       className += " visited-story";
-    }
-    if (story.pinned) {
-      className += " pinned-story";
     }
     return className;
   };
@@ -162,28 +143,6 @@ const StoryItem: React.FC<StoryItemProps> = ({
         >
           {story.descendants || 0} comments
         </a>
-        {onTogglePin && (
-          <a
-            className={`pin-link ${story.pinned ? "pinned" : ""}`}
-            onClick={handlePinClick}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                // Create a synthetic event object with just stopPropagation
-                const syntheticEvent = {
-                  stopPropagation: () => {},
-                };
-                handlePinClick(
-                  syntheticEvent as React.MouseEvent<HTMLAnchorElement>,
-                );
-              }
-            }}
-          >
-            {story.pinned ? "unpin" : "pin"}
-          </a>
-        )}
       </div>
     </div>
   );

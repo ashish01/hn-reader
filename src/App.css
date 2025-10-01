@@ -106,11 +106,6 @@ a:visited {
     background-color: rgba(0, 0, 0, 0.02);
 }
 
-/* Styles for pinned stories */
-.pinned-story {
-    /* No background color here, moved to container */
-}
-
 /* Styles for visited stories */
 .visited-story {
     opacity: 0.7;
@@ -130,30 +125,6 @@ a:visited {
 
 .story-title-row {
     display: block;
-}
-
-/* Pin button styling */
-.pin-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 1px 2px;
-    margin-right: 4px;
-    font-size: 12px;
-    opacity: 0.6;
-    transition: all 0.1s ease-in-out;
-    border-radius: 2px;
-}
-
-.pin-button:hover {
-    opacity: 1;
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-.pin-button.pinned {
-    opacity: 1;
-    color: var(--hn-orange);
-    transform: scale(1.1);
 }
 
 /* Style for the story title link */
@@ -196,21 +167,6 @@ a:visited {
 
 .story-comments-link:hover {
     text-decoration: underline;
-}
-
-/* Style for the pin link within story-info */
-.pin-link {
-    color: var(--light-text);
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.pin-link:hover {
-    text-decoration: underline;
-}
-
-.pin-link.pinned {
-    color: var(--hn-orange);
 }
 
 /* Navigation */
@@ -426,20 +382,6 @@ a:visited {
 .error {
     color: #e05151;
 }
-
-/* Pinned count styling */
-.pinned-count {
-    color: var(--hn-orange);
-    font-weight: 500;
-}
-
-/* Pinned container styling */
-.pinned-container {
-    position: relative;
-    background-color: rgba(255, 102, 0, 0.08);
-}
-
-/* Using container background color and pin/unpin text for pinned stories */
 
 /* Media queries for responsive design */
 @media (max-width: 768px) {

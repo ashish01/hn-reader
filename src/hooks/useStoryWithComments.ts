@@ -284,7 +284,7 @@ export const useStoryWithComments = (storyId: number) => {
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to load comment children'));
     }
-  }, [comments, findCommentById, updateCommentInTree]);
+  }, [storyId, comments, findCommentById, updateCommentInTree]);
 
   return { 
     story, 

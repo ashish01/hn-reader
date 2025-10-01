@@ -3,7 +3,7 @@ import { Comment as CommentType } from "../types";
 
 interface CommentProps {
   comment: CommentType & {
-    children?: any[];
+    children?: CommentType[];
     isExpanded?: boolean;
     childrenLoaded?: boolean;
     isLoading?: boolean;
