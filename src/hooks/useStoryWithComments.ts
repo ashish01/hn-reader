@@ -133,18 +133,6 @@ export const useStoryWithComments = (storyId: number) => {
 
             // Store in map keyed by the comment id
             commentsMap.set(kidId, commentWithState);
-
-            // Update comments in order as they arrive
-            setComments(() => {
-              const orderedComments: CommentWithChildren[] = [];
-              for (const kid of fetchedStory.kids) {
-                const comment = commentsMap.get(kid);
-                if (comment) {
-                  orderedComments.push(comment);
-                }
-              }
-              return orderedComments;
-            });
           } catch (err) {
             console.error(`Error fetching comment ${kidId}:`, err);
           }
@@ -152,6 +140,18 @@ export const useStoryWithComments = (storyId: number) => {
 
         // Wait for all comments to complete
         await Promise.all(commentPromises);
+
+        if (!isMounted) return;
+
+        // Update comments in order after all are fetched
+        const orderedComments: CommentWithChildren[] = [];
+        for (const kid of fetchedStory.kids) {
+          const comment = commentsMap.get(kid);
+          if (comment) {
+            orderedComments.push(comment);
+          }
+        }
+        setComments(orderedComments);
         
         if (!isMounted) return;
         setLoadingComments(false);
@@ -239,27 +239,6 @@ export const useStoryWithComments = (storyId: number) => {
 
           // Store in map keyed by the comment id
           childrenMap.set(kidId, childWithState);
-
-          // Update children in order as they arrive
-          setComments(prevComments =>
-            updateCommentInTree(
-              commentId,
-              comment => {
-                const orderedChildren: CommentWithChildren[] = [];
-                for (const kid of kidIds) {
-                  const child = childrenMap.get(kid);
-                  if (child) {
-                    orderedChildren.push(child);
-                  }
-                }
-                return {
-                  ...comment,
-                  children: orderedChildren
-                };
-              },
-              prevComments
-            )
-          );
         } catch (err) {
           console.error(`Error loading comment ${kidId}:`, err);
         }
@@ -267,6 +246,26 @@ export const useStoryWithComments = (storyId: number) => {
 
       // Wait for all children to complete
       await Promise.all(childPromises);
+
+      // Update children in order after all are fetched
+      const orderedChildren: CommentWithChildren[] = [];
+      for (const kid of kidIds) {
+        const child = childrenMap.get(kid);
+        if (child) {
+          orderedChildren.push(child);
+        }
+      }
+
+      setComments(prevComments =>
+        updateCommentInTree(
+          commentId,
+          comment => ({
+            ...comment,
+            children: orderedChildren
+          }),
+          prevComments
+        )
+      );
       
       // Mark as finished loading
       setComments(prevComments => 
