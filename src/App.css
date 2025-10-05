@@ -257,6 +257,23 @@ a:visited {
     font-size: 12px;
 }
 
+.story-text {
+    margin-bottom: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    padding-left: 12px;
+    border-left: 3px solid var(--hn-orange);
+    color: var(--text-color);
+}
+
+.story-text p {
+    margin: 8px 0;
+}
+
+.story-text a {
+    color: var(--hn-orange);
+}
+
 .story-meta {
     font-size: 11px;
     color: var(--light-text);

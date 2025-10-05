@@ -58,6 +58,13 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId, onBack }) => {
           </div>
         )}
 
+        {story.text && (
+          <div
+            className="story-text"
+            dangerouslySetInnerHTML={{ __html: story.text }}
+          />
+        )}
+
         <div className="story-meta">
           <span>{story.score} points</span>
           <span>by {story.by}</span>
