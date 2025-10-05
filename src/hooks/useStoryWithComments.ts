@@ -114,7 +114,7 @@ export const useStoryWithComments = (storyId: number) => {
         const commentsMap = new Map<number, CommentWithChildren>();
 
         // Fetch all comments in parallel
-        const commentPromises = fetchedStory.kids.map(async (kidId, index) => {
+        const commentPromises = fetchedStory.kids.map(async (kidId) => {
           try {
             const comment = await getComment(kidId);
 
@@ -131,14 +131,14 @@ export const useStoryWithComments = (storyId: number) => {
               children: []
             };
 
-            // Store in map with original index
-            commentsMap.set(index, commentWithState);
+            // Store in map keyed by the comment id
+            commentsMap.set(kidId, commentWithState);
 
             // Update comments in order as they arrive
             setComments(() => {
               const orderedComments: CommentWithChildren[] = [];
-              for (let i = 0; i < fetchedStory.kids.length; i++) {
-                const comment = commentsMap.get(i);
+              for (const kid of fetchedStory.kids) {
+                const comment = commentsMap.get(kid);
                 if (comment) {
                   orderedComments.push(comment);
                 }
@@ -215,11 +215,11 @@ export const useStoryWithComments = (storyId: number) => {
       // Get the children IDs
       const kidIds = commentToUpdate.kids || [];
 
-      // Map to track children by their original index
+      // Map to track children keyed by their id
       const childrenMap = new Map<number, CommentWithChildren>();
 
       // Fetch all children in parallel
-      const childPromises = kidIds.map(async (kidId, index) => {
+      const childPromises = kidIds.map(async (kidId) => {
         try {
           const childComment = await getComment(kidId);
 
@@ -237,8 +237,8 @@ export const useStoryWithComments = (storyId: number) => {
             children: []
           };
 
-          // Store in map with original index
-          childrenMap.set(index, childWithState);
+          // Store in map keyed by the comment id
+          childrenMap.set(kidId, childWithState);
 
           // Update children in order as they arrive
           setComments(prevComments =>
@@ -246,8 +246,8 @@ export const useStoryWithComments = (storyId: number) => {
               commentId,
               comment => {
                 const orderedChildren: CommentWithChildren[] = [];
-                for (let i = 0; i < kidIds.length; i++) {
-                  const child = childrenMap.get(i);
+                for (const kid of kidIds) {
+                  const child = childrenMap.get(kid);
                   if (child) {
                     orderedChildren.push(child);
                   }
