@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import StoriesPage from "./components/StoriesPage";
 import StoryPage from "./components/StoryPage";
+import LiveStoriesPage from "./components/LiveStoriesPage";
 import { markStoryAsVisited } from "./utils/visitedStories";
 import "./index.css";
 import "./App.css";
@@ -56,6 +57,18 @@ function StoriesRoute() {
   );
 }
 
+// Live stories page
+function LiveStoriesRoute() {
+  const navigate = useNavigate();
+
+  const handleStorySelect = (id: number) => {
+    markStoryAsVisited(id);
+    navigate(`/story/${id}`);
+  };
+
+  return <LiveStoriesPage onStorySelect={handleStorySelect} />;
+}
+
 function App() {
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     // Check for saved preference or default to false
@@ -85,14 +98,20 @@ function App() {
         <h1 className="app-title">
           <Link to="/">HN Reader</Link>
         </h1>
-        <button className="theme-toggle" onClick={toggleDarkMode}>
-          {darkMode ? "Light Mode" : "Dark Mode"}
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="theme-toggle" onClick={toggleDarkMode}>
+            {darkMode ? "Light Mode" : "Dark Mode"}
+          </button>
+          <Link to="/live" className="theme-toggle">
+            Live Mode
+          </Link>
+        </div>
       </header>
 
       <main>
         <Routes>
           <Route path="/" element={<StoriesRoute />} />
+          <Route path="/live" element={<LiveStoriesRoute />} />
           <Route path="/story/:storyId" element={<StoryRoute />} />
         </Routes>
       </main>

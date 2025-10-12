@@ -56,12 +56,40 @@ export const getStoryWithComments = async (id: number): Promise<{ story: Story, 
 // Prefetch next level comments for a given comment
 export const getCommentChildren = async (commentId: number): Promise<Comment[]> => {
   const comment = await getComment(commentId);
-  
+
   if (!comment.kids || comment.kids.length === 0) {
     return [];
   }
-  
+
   return Promise.all(
     comment.kids.map(kidId => getComment(kidId))
   );
+};
+
+// Fetch multiple items in parallel and filter out null/deleted items
+export const getItemsBatch = async (ids: number[]): Promise<Item[]> => {
+  const items = await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const item = await getItem(id);
+        // Filter out deleted or dead items
+        if (item && !item.deleted && !item.dead) {
+          return item;
+        }
+        return null;
+      } catch (error) {
+        console.error(`Error fetching item ${id}:`, error);
+        return null;
+      }
+    })
+  );
+
+  // Filter out null values
+  return items.filter((item): item is Item => item !== null);
+};
+
+// Get max item ID
+export const getMaxItemId = async (): Promise<number> => {
+  const response = await axios.get<number>(`${BASE_URL}/maxitem.json`);
+  return response.data;
 };

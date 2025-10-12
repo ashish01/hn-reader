@@ -424,6 +424,32 @@ a:visited {
     color: #e05151;
 }
 
+/* Live mode animations */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes highlightFlash {
+  0% {
+    background-color: rgba(255, 102, 0, 0.15);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.newly-added {
+  animation: slideInFromTop 0.4s ease-out,
+             highlightFlash 2s ease-out;
+}
+
 /* Media queries for responsive design */
 @media (max-width: 768px) {
     .app {
@@ -441,16 +467,16 @@ a:visited {
     .page-range {
         display: none;
     }
-    
+
     /* Additional HN-like density improvements for mobile */
     .story-container {
         padding: 2px 0;
     }
-    
+
     .story-item {
         padding: 0.0625rem 0.125rem;
     }
-    
+
     .stories-controls-bottom {
         margin-top: 5px;
     }
