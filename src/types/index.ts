@@ -16,6 +16,7 @@ export interface Item {
   title?: string;
   parts?: number[];
   descendants?: number;
+  visited?: boolean;
 }
 
 export interface Story extends Item {

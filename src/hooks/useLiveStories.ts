@@ -40,7 +40,7 @@ export const useLiveStories = () => {
       const visitedIds = getVisitedStories();
       setItems(prevItems => {
         return prevItems.map(item => {
-          if (item.type === 'story' && visitedIds.includes(item.id) && !(item as any).visited) {
+          if (item.type === 'story' && visitedIds.includes(item.id) && !item.visited) {
             return { ...item, visited: true };
           }
           return item;

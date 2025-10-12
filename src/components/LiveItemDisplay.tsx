@@ -11,7 +11,7 @@ const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick })
   const renderItemContent = () => {
     switch (item.type) {
       case 'story': {
-        const isVisited = (item as any).visited;
+        const isVisited = item.visited;
         const handleClick = () => {
           if (onStoryClick) {
             onStoryClick(item.id);

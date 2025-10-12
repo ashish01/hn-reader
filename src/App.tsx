@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import {
   Routes,
   Route,
@@ -7,12 +7,14 @@ import {
   useLocation,
   Link,
 } from "react-router-dom";
-import StoriesPage from "./components/StoriesPage";
-import StoryPage from "./components/StoryPage";
-import LiveStoriesPage from "./components/LiveStoriesPage";
 import { markStoryAsVisited } from "./utils/visitedStories";
 import "./index.css";
 import "./App.css";
+
+// Lazy load page components for code splitting
+const StoriesPage = lazy(() => import("./components/StoriesPage"));
+const StoryPage = lazy(() => import("./components/StoryPage"));
+const LiveStoriesPage = lazy(() => import("./components/LiveStoriesPage"));
 
 // Story component with router params
 function StoryRoute() {
@@ -109,11 +111,13 @@ function App() {
       </header>
 
       <main>
-        <Routes>
-          <Route path="/" element={<StoriesRoute />} />
-          <Route path="/live" element={<LiveStoriesRoute />} />
-          <Route path="/story/:storyId" element={<StoryRoute />} />
-        </Routes>
+        <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<StoriesRoute />} />
+            <Route path="/live" element={<LiveStoriesRoute />} />
+            <Route path="/story/:storyId" element={<StoryRoute />} />
+          </Routes>
+        </Suspense>
       </main>
 
       <footer className="app-footer">
