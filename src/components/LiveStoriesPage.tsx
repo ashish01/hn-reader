@@ -7,7 +7,17 @@ interface LiveStoriesPageProps {
 }
 
 const LiveStoriesPage: React.FC<LiveStoriesPageProps> = ({ onStorySelect }) => {
-  const { items, error, loading, renderMarkerTime, timelinePending, isLive, lastUpdateTime, markerGapSeconds } = useLiveStories();
+  const {
+    items,
+    error,
+    loading,
+    renderMarkerTime,
+    timelinePending,
+    isLive,
+    lastUpdateTime,
+    markerGapSeconds,
+    baseDelaySeconds,
+  } = useLiveStories();
 
   if (error) {
     return <div className="error">Error loading live feed: {error.message}</div>;
@@ -19,21 +29,25 @@ const LiveStoriesPage: React.FC<LiveStoriesPageProps> = ({ onStorySelect }) => {
 
       {/* Status bar */}
       {renderMarkerTime > 0 && (
-        <div style={{
-          padding: '8px 12px',
-          marginBottom: '16px',
-          backgroundColor: 'var(--card-background)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '4px',
-          fontSize: '12px',
-          color: 'var(--light-text)',
-          fontFamily: 'monospace',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
+        <div
+          style={{
+            padding: '8px 12px',
+            marginBottom: '16px',
+            backgroundColor: 'var(--card-background)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '4px',
+            fontSize: '12px',
+            color: 'var(--light-text)',
+            fontFamily: 'monospace',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}
+        >
           <span style={{ color: isLive ? '#ff6600' : 'var(--light-text)', fontWeight: 'bold' }}>
-            {isLive ? '🔴 LIVE' : '⏸️ Buffering'}
+            {isLive
+              ? `⏱️ Buffered playback (~${baseDelaySeconds}s delay)`
+              : `▶️ Replay queue: ${timelinePending} item${timelinePending === 1 ? '' : 's'}`}
           </span>
           {lastUpdateTime > 0 && (
             <span>
@@ -41,10 +55,12 @@ const LiveStoriesPage: React.FC<LiveStoriesPageProps> = ({ onStorySelect }) => {
             </span>
           )}
           <span>
-            Marker: {new Date(renderMarkerTime * 1000).toLocaleTimeString()} ({markerGapSeconds}s lag)
+            Playback time: {new Date(renderMarkerTime * 1000).toLocaleTimeString()} (~{baseDelaySeconds}s behind real time)
           </span>
           <span>
-            Pending: {timelinePending}
+            {markerGapSeconds > 0
+              ? `Next item in ${markerGapSeconds}s`
+              : 'Awaiting next item'}
           </span>
         </div>
       )}
