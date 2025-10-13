@@ -1,15 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ref, onValue } from 'firebase/database';
-import { db } from '../services/firebase';
 import { getItemsBatch } from '../api/hackernews';
 import { Item } from '../types';
 import { getVisitedStories } from '../utils/visitedStories';
 
 const INITIAL_ITEMS_TO_FETCH = 100;
 const DISPLAY_DELAY_MS = 30000; // 30 seconds
-const INITIAL_STAGGER_MS = 3000; // 3 seconds between items on initial load
 const MAX_DISPLAYED_ITEMS = 200;
 const VISITED_STORIES_KEY = 'hn-visited-stories';
+const POLL_INTERVAL_MS = 2000; // Poll for new items every 2 seconds
+const HN_API_BASE = 'https://hacker-news.firebaseio.com/v0';
 
 export const useLiveStories = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -92,14 +91,18 @@ export const useLiveStories = () => {
     updateStats();
   }, []);
 
-  // Main Firebase listener
+  // Poll for new items using HN API directly
   useEffect(() => {
-    const maxItemRef = ref(db, 'v0/maxitem');
+    console.log('Setting up polling for maxitem...');
 
-    const unsubscribe = onValue(
-      maxItemRef,
-      async (snapshot) => {
-        const newMaxId = snapshot.val() as number;
+    const checkForNewItems = async () => {
+      try {
+        const response = await fetch(`${HN_API_BASE}/maxitem.json`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const newMaxId = await response.json() as number;
+        console.log('Polled maxitem:', newMaxId, 'prev:', prevMaxId.current);
         setLastUpdateTime(Date.now());
 
         // Initial load: fetch recent items
@@ -143,14 +146,18 @@ export const useLiveStories = () => {
               ageMinutes: Math.floor((now - (i.time || 0)) / 60)
             })));
 
-            // Schedule first half immediately, second half with stagger
-            const halfPoint = Math.floor(validItems.length / 2);
+            // Show all but the last 10 items immediately
+            // Last 10 items get a small stagger to show "flow"
+            const itemsToShowImmediately = validItems.length - 10;
 
             validItems.forEach((item, index) => {
-              if (index < halfPoint) {
+              if (index < itemsToShowImmediately) {
+                // Show immediately
                 scheduleItem(item, 0);
               } else {
-                const staggerDelay = (index - halfPoint) * INITIAL_STAGGER_MS;
+                // Last 10 items: stagger by 2 seconds each
+                const staggerIndex = index - itemsToShowImmediately;
+                const staggerDelay = (staggerIndex + 1) * 2000; // 2 seconds apart
                 scheduleItem(item, staggerDelay);
               }
             });
@@ -201,14 +208,22 @@ export const useLiveStories = () => {
         }
 
         prevMaxId.current = newMaxId;
-      },
-      (err) => {
-        console.error('Firebase listener error:', err);
-        setError(err instanceof Error ? err : new Error('Firebase connection error'));
+      } catch (err) {
+        console.error('Error polling maxitem:', err);
+        setError(err instanceof Error ? err : new Error('Failed to poll for new items'));
       }
-    );
+    };
 
-    return () => unsubscribe();
+    // Initial check
+    checkForNewItems();
+
+    // Set up polling interval
+    const intervalId = setInterval(checkForNewItems, POLL_INTERVAL_MS);
+
+    return () => {
+      console.log('Cleaning up polling interval');
+      clearInterval(intervalId);
+    };
   }, [scheduleItem]);
 
   return {
