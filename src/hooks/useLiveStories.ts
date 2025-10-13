@@ -2,37 +2,42 @@ import { useState, useEffect } from 'react';
 import { Item } from '../types';
 import { getVisitedStories } from '../utils/visitedStories';
 import useMaxItemListener from './useMaxItemListener';
+import useTimelineRenderer from './useTimelineRenderer';
 
 const VISITED_STORIES_KEY = 'hn-visited-stories';
 const MAX_ITEMS_DISPLAYED = 200; // Limit to prevent memory issues
 
 export const useLiveStories = () => {
   const [items, setItems] = useState<Item[]>([]);
-  const { newItems, error, loading } = useMaxItemListener();
 
-  // Add new items to the top of the list
+  // Get timeline buffer from Firebase listener
+  const { timelineBuffer, error, loading } = useMaxItemListener();
+
+  // Get displayed items from timeline renderer
+  const { displayedItems, renderMarkerTime, timelinePending, isLive } = useTimelineRenderer(timelineBuffer);
+
+  // Apply visited status to displayed items directly
   useEffect(() => {
-    if (newItems.length > 0) {
-      setItems((prevItems) => {
-        // Get visited stories
-        const visitedIds = getVisitedStories();
+    const visitedIds = getVisitedStories();
 
-        // Mark stories as visited if they're in the visited list
-        const markedNewItems = newItems.map(item => {
-          if (item.type === 'story' && visitedIds.includes(item.id)) {
-            return { ...item, visited: true };
-          }
-          return item;
-        });
+    // Mark stories as visited if they're in the visited list
+    const markedItems = displayedItems.map(item => {
+      if (item.type === 'story' && visitedIds.includes(item.id)) {
+        return { ...item, visited: true };
+      }
+      return item;
+    });
 
-        // Combine new items with existing ones
-        const combined = [...markedNewItems, ...prevItems];
+    // Limit total number of items to prevent memory issues
+    const limitedItems = markedItems.slice(0, MAX_ITEMS_DISPLAYED);
 
-        // Limit total number of items to prevent memory issues
-        return combined.slice(0, MAX_ITEMS_DISPLAYED);
-      });
-    }
-  }, [newItems]);
+    console.log('[useLiveStories] Setting items', {
+      displayedItemsCount: displayedItems.length,
+      finalItemsCount: limitedItems.length
+    });
+
+    setItems(limitedItems);
+  }, [displayedItems]);
 
   // Update visited status when localStorage changes
   useEffect(() => {
@@ -65,6 +70,9 @@ export const useLiveStories = () => {
     items,
     error,
     loading,
+    renderMarkerTime,
+    timelinePending,
+    isLive,
   };
 };
 

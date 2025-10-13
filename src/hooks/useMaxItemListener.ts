@@ -5,10 +5,21 @@ import { getItemsBatch } from '../api/hackernews';
 import { Item } from '../types';
 
 const MAX_DELTA_LIMIT = 50; // Limit items to check if delta is too large
-const INITIAL_ITEMS_TO_FETCH = 30; // Number of items to fetch on initial load
+const INITIAL_ITEMS_TO_FETCH = 100; // Number of items to fetch on initial load
+const MAX_TIMELINE_BUFFER = 150; // Maximum items in timeline buffer
+
+// Helper function to insert items in timeline sorted by timestamp
+const insertItemsSorted = (timeline: Item[], newItems: Item[]): Item[] => {
+  const combined = [...timeline, ...newItems];
+  // Sort by time (ascending - oldest first)
+  // Filter out items without time and handle undefined
+  return combined
+    .filter(item => item.time !== undefined)
+    .sort((a, b) => (a.time || 0) - (b.time || 0));
+};
 
 export const useMaxItemListener = () => {
-  const [newItems, setNewItems] = useState<Item[]>([]);
+  const [timelineBuffer, setTimelineBuffer] = useState<Item[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const prevMaxId = useRef<number | null>(null);
@@ -24,14 +35,14 @@ export const useMaxItemListener = () => {
       async (snapshot) => {
         const newMaxId = snapshot.val() as number;
 
-        // Initialize on first load - fetch recent stories
+        // Initialize on first load - fetch recent items to populate timeline
         if (!isInitialized.current) {
           prevMaxId.current = newMaxId;
           isInitialized.current = true;
 
           try {
             setLoading(true);
-            // Fetch the last N items to populate initial feed
+            // Fetch the last N items to populate timeline buffer
             const idsToFetch: number[] = [];
             for (let id = newMaxId; id > newMaxId - INITIAL_ITEMS_TO_FETCH; id--) {
               idsToFetch.push(id);
@@ -39,8 +50,10 @@ export const useMaxItemListener = () => {
 
             const items = await getItemsBatch(idsToFetch);
 
-            // Set all items (stories, comments, jobs, polls, etc.)
-            setNewItems(items);
+            // Set timeline buffer sorted by timestamp (oldest first)
+            // Filter out items without time
+            const itemsWithTime = items.filter(item => item.time !== undefined);
+            setTimelineBuffer(itemsWithTime.sort((a, b) => (a.time || 0) - (b.time || 0)));
             setLoading(false);
           } catch (err) {
             console.error('Error fetching initial items:', err);
@@ -71,9 +84,17 @@ export const useMaxItemListener = () => {
             // Fetch all items in parallel
             const items = await getItemsBatch(idsToFetch);
 
-            // Update state with new items (all types, reverse to show newest first)
+            // Add new items to timeline buffer (sorted by timestamp)
             if (items.length > 0) {
-              setNewItems((prev) => [...items.reverse(), ...prev]);
+              setTimelineBuffer((prev) => {
+                const updated = insertItemsSorted(prev, items);
+                // Limit timeline buffer to prevent unbounded growth
+                if (updated.length > MAX_TIMELINE_BUFFER) {
+                  // Keep the most recent items (remove oldest)
+                  return updated.slice(-MAX_TIMELINE_BUFFER);
+                }
+                return updated;
+              });
             }
           } catch (err) {
             console.error('Error fetching new items:', err);
@@ -97,7 +118,7 @@ export const useMaxItemListener = () => {
   }, []);
 
   return {
-    newItems,
+    timelineBuffer,
     error,
     loading,
   };
