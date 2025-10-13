@@ -93,8 +93,6 @@ export const useLiveStories = () => {
 
   // Poll for new items using HN API directly
   useEffect(() => {
-    console.log('Setting up polling for maxitem...');
-
     const checkForNewItems = async () => {
       try {
         const response = await fetch(`${HN_API_BASE}/maxitem.json`);
@@ -102,7 +100,6 @@ export const useLiveStories = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const newMaxId = await response.json() as number;
-        console.log('Polled maxitem:', newMaxId, 'prev:', prevMaxId.current);
         setLastUpdateTime(Date.now());
 
         // Initial load: fetch recent items
@@ -125,40 +122,27 @@ export const useLiveStories = () => {
             // Sort by ID descending (newest first)
             validItems.sort((a, b) => b.id - a.id);
 
-            // Debug: Check what we're fetching
+            // Only show items from the last 10 minutes on initial load
+            // This prevents old items from flashing on screen
             const now = Date.now() / 1000; // Current time in seconds
-            console.log('Initial load - Max ID from Firebase:', newMaxId);
-            console.log('Fetching IDs from', newMaxId - INITIAL_ITEMS_TO_FETCH + 1, 'to', newMaxId);
-            console.log('Valid items received:', validItems.length);
+            const tenMinutesAgo = now - (10 * 60); // 10 minutes in seconds
+            const recentItems = validItems.filter(item =>
+              item.time && item.time >= tenMinutesAgo
+            );
 
-            // Show age distribution
-            const ages = validItems.map(item => Math.floor((now - (item.time || 0)) / 60)); // age in minutes
-            console.log('Item ages (minutes):', {
-              min: Math.min(...ages),
-              max: Math.max(...ages),
-              avg: Math.floor(ages.reduce((a, b) => a + b, 0) / ages.length)
-            });
+            // Stagger items to create a flow on initial load
+            // Show OLDEST items immediately, queue up to 5 NEWEST items with staggered delays
+            const STAGGER_DELAY_MS = 3000; // 3 seconds between items
+            const ITEMS_TO_QUEUE = Math.min(5, recentItems.length); // Queue up to 5 newest items
 
-            // Show first few items with their timestamps
-            console.log('First 5 items (by ID):', validItems.slice(0, 5).map(i => ({
-              id: i.id,
-              type: i.type,
-              ageMinutes: Math.floor((now - (i.time || 0)) / 60)
-            })));
-
-            // Show all but the last 10 items immediately
-            // Last 10 items get a small stagger to show "flow"
-            const itemsToShowImmediately = validItems.length - 10;
-
-            validItems.forEach((item, index) => {
-              if (index < itemsToShowImmediately) {
-                // Show immediately
-                scheduleItem(item, 0);
+            recentItems.forEach((item, index) => {
+              if (index < ITEMS_TO_QUEUE) {
+                // These are the NEWEST items (first in array) - stagger them
+                const delay = (index + 1) * STAGGER_DELAY_MS;
+                scheduleItem(item, delay);
               } else {
-                // Last 10 items: stagger by 2 seconds each
-                const staggerIndex = index - itemsToShowImmediately;
-                const staggerDelay = (staggerIndex + 1) * 2000; // 2 seconds apart
-                scheduleItem(item, staggerDelay);
+                // These are the OLDER items - show them immediately
+                scheduleItem(item, 0);
               }
             });
 
@@ -185,22 +169,24 @@ export const useLiveStories = () => {
             const fetchedItems = await getItemsBatch(idsToFetch);
             const validItems = fetchedItems.filter(item => item && item.id);
 
-            // Debug new items
-            const now = Date.now() / 1000;
-            console.log('New items arrived:', validItems.length, 'IDs:', validItems.map(i => i.id));
+            // Schedule each new item with delay based on creation time
+            // This preserves the relative timing between items for a streaming effect
             if (validItems.length > 0) {
-              const ages = validItems.map(item => Math.floor((now - (item.time || 0)) / 60));
-              console.log('New item ages (minutes):', {
-                min: Math.min(...ages),
-                max: Math.max(...ages),
-                items: validItems.map(i => ({ id: i.id, type: i.type, ageMin: Math.floor((now - (i.time || 0)) / 60) }))
+              // Find the oldest item timestamp
+              const oldestTime = Math.min(...validItems.map(item => item.time || 0));
+
+              validItems.forEach(item => {
+                if (item.time) {
+                  // Calculate delay: base delay + time since oldest item
+                  const relativeAge = (item.time - oldestTime) * 1000; // Convert to ms
+                  const delay = DISPLAY_DELAY_MS + relativeAge;
+                  scheduleItem(item, delay);
+                } else {
+                  // Fallback if no timestamp
+                  scheduleItem(item, DISPLAY_DELAY_MS);
+                }
               });
             }
-
-            // Schedule each new item with fixed delay
-            validItems.forEach(item => {
-              scheduleItem(item, DISPLAY_DELAY_MS);
-            });
           } catch (err) {
             console.error('Error fetching new items:', err);
             setError(err instanceof Error ? err : new Error('Failed to fetch new items'));
@@ -221,7 +207,6 @@ export const useLiveStories = () => {
     const intervalId = setInterval(checkForNewItems, POLL_INTERVAL_MS);
 
     return () => {
-      console.log('Cleaning up polling interval');
       clearInterval(intervalId);
     };
   }, [scheduleItem]);

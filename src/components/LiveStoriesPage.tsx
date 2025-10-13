@@ -11,12 +11,7 @@ const LiveStoriesPage: React.FC<LiveStoriesPageProps> = ({ onStorySelect }) => {
     items,
     error,
     loading,
-    renderMarkerTime,
     timelinePending,
-    isLive,
-    lastUpdateTime,
-    markerGapSeconds,
-    baseDelaySeconds,
   } = useLiveStories();
 
   if (error) {
@@ -28,42 +23,22 @@ const LiveStoriesPage: React.FC<LiveStoriesPageProps> = ({ onStorySelect }) => {
       <h1>Hacker News Live</h1>
 
       {/* Status bar */}
-      {renderMarkerTime > 0 && (
-        <div
-          style={{
-            padding: '8px 12px',
-            marginBottom: '16px',
-            backgroundColor: 'var(--card-background)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '4px',
-            fontSize: '12px',
-            color: 'var(--light-text)',
-            fontFamily: 'monospace',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '16px'
-          }}
-        >
-          <span style={{ color: isLive ? '#ff6600' : 'var(--light-text)', fontWeight: 'bold' }}>
-            {isLive
-              ? `⏱️ Buffered playback (~${baseDelaySeconds}s delay)`
-              : `▶️ Replay queue: ${timelinePending} item${timelinePending === 1 ? '' : 's'}`}
-          </span>
-          {lastUpdateTime > 0 && (
-            <span>
-              Last update: {new Date(lastUpdateTime).toLocaleTimeString()} ({Math.floor((Date.now() - lastUpdateTime) / 1000)}s ago)
-            </span>
-          )}
-          <span>
-            Playback time: {new Date(renderMarkerTime * 1000).toLocaleTimeString()} (~{baseDelaySeconds}s behind real time)
-          </span>
-          <span>
-            {markerGapSeconds > 0
-              ? `Next item in ${markerGapSeconds}s`
-              : 'Awaiting next item'}
-          </span>
-        </div>
-      )}
+      <div
+        style={{
+          padding: '8px 12px',
+          marginBottom: '16px',
+          backgroundColor: 'var(--card-background)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '4px',
+          fontSize: '12px',
+          color: 'var(--light-text)',
+          fontFamily: 'monospace',
+        }}
+      >
+        <span style={{ fontWeight: 'bold' }}>
+          Queued items: {timelinePending}
+        </span>
+      </div>
 
       {loading && items.length === 0 ? (
         <div className="loading-indicator">Loading recent items...</div>
