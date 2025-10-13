@@ -3,19 +3,20 @@ import { Item } from '../types';
 
 const MARKER_TICK_INTERVAL = 1000; // Advance marker every 1 second
 const MAX_OFFSET = 30; // Never be more than 30 seconds behind NOW
-const INITIAL_OFFSET = 2; // Start 2 seconds before first item
 
 interface TimelineRendererResult {
   displayedItems: Item[];
   renderMarkerTime: number;
   timelinePending: number;
   isLive: boolean;
+  markerGapSeconds: number;
 }
 
 export const useTimelineRenderer = (timelineBuffer: Item[]): TimelineRendererResult => {
   const [displayedItems, setDisplayedItems] = useState<Item[]>([]);
   const [renderMarkerTime, setRenderMarkerTime] = useState<number>(0);
   const [isLive, setIsLive] = useState<boolean>(false);
+  const [markerGapSeconds, setMarkerGapSeconds] = useState<number>(0);
 
   // Use refs to avoid recreating interval
   const timelineRef = useRef<Item[]>([]);
@@ -39,17 +40,6 @@ export const useTimelineRenderer = (timelineBuffer: Item[]): TimelineRendererRes
         // Start marker MAX_OFFSET seconds behind NOW
         // This keeps us within the 30-second window from the start
         const markerStartTime = now - MAX_OFFSET;
-
-        console.log('[Timeline] Initialized', {
-          now: new Date(now * 1000).toLocaleTimeString(),
-          markerStart: new Date(markerStartTime * 1000).toLocaleTimeString(),
-          offset: MAX_OFFSET,
-          bufferSize: timelineBuffer.length,
-          itemsInRange: validItems.filter(item =>
-            item.time && item.time >= markerStartTime && item.time <= now
-          ).length
-        });
-
         setRenderMarkerTime(markerStartTime);
         isInitialized.current = true;
       }
@@ -58,8 +48,6 @@ export const useTimelineRenderer = (timelineBuffer: Item[]): TimelineRendererRes
 
   // Set up interval once - it runs continuously
   useEffect(() => {
-    console.log('[Timeline] Setting up interval');
-
     const interval = setInterval(() => {
       if (!isInitialized.current) return;
 
@@ -69,12 +57,9 @@ export const useTimelineRenderer = (timelineBuffer: Item[]): TimelineRendererRes
 
         // If marker is more than MAX_OFFSET behind, jump forward
         const offset = now - prevMarkerTime;
+        setMarkerGapSeconds(offset);
+
         if (offset > MAX_OFFSET) {
-          console.log('[Timeline] Marker lagging, jumping forward', {
-            lag: offset,
-            from: new Date(prevMarkerTime * 1000).toLocaleTimeString(),
-            to: new Date((now - MAX_OFFSET) * 1000).toLocaleTimeString()
-          });
           newMarkerTime = now - MAX_OFFSET;
           setIsLive(false);
         } else if (prevMarkerTime >= now) {
@@ -96,11 +81,6 @@ export const useTimelineRenderer = (timelineBuffer: Item[]): TimelineRendererRes
         );
 
         if (itemsToDisplay.length > 0) {
-          console.log('[Timeline] Displaying', {
-            count: itemsToDisplay.length,
-            markerTime: new Date(newMarkerTime * 1000).toLocaleTimeString()
-          });
-
           // Add to displayed items
           setDisplayedItems((prev) => [...itemsToDisplay.reverse(), ...prev]);
 
@@ -113,7 +93,6 @@ export const useTimelineRenderer = (timelineBuffer: Item[]): TimelineRendererRes
     }, MARKER_TICK_INTERVAL);
 
     return () => {
-      console.log('[Timeline] Cleaning up interval');
       clearInterval(interval);
     };
   }, []); // Empty deps - runs once
@@ -123,6 +102,7 @@ export const useTimelineRenderer = (timelineBuffer: Item[]): TimelineRendererRes
     renderMarkerTime,
     timelinePending: timelineBuffer.filter(item => !displayedIdsRef.current.has(item.id)).length,
     isLive,
+    markerGapSeconds,
   };
 };
 

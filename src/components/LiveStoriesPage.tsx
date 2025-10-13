@@ -7,7 +7,7 @@ interface LiveStoriesPageProps {
 }
 
 const LiveStoriesPage: React.FC<LiveStoriesPageProps> = ({ onStorySelect }) => {
-  const { items, error, loading, renderMarkerTime, timelinePending, isLive } = useLiveStories();
+  const { items, error, loading, renderMarkerTime, timelinePending, isLive, lastUpdateTime, markerGapSeconds } = useLiveStories();
 
   if (error) {
     return <div className="error">Error loading live feed: {error.message}</div>;
@@ -17,7 +17,7 @@ const LiveStoriesPage: React.FC<LiveStoriesPageProps> = ({ onStorySelect }) => {
     <div className="stories-page">
       <h1>Hacker News Live</h1>
 
-      {/* Debug info */}
+      {/* Status bar */}
       {renderMarkerTime > 0 && (
         <div style={{
           padding: '8px 12px',
@@ -27,16 +27,24 @@ const LiveStoriesPage: React.FC<LiveStoriesPageProps> = ({ onStorySelect }) => {
           borderRadius: '4px',
           fontSize: '12px',
           color: 'var(--light-text)',
-          fontFamily: 'monospace'
+          fontFamily: 'monospace',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '16px'
         }}>
-          <span style={{ marginRight: '16px' }}>
-            Marker: {new Date(renderMarkerTime * 1000).toLocaleTimeString()}
-          </span>
-          <span style={{ marginRight: '16px' }}>
-            Pending: {timelinePending}
-          </span>
-          <span style={{ color: isLive ? '#ff6600' : 'var(--light-text)' }}>
+          <span style={{ color: isLive ? '#ff6600' : 'var(--light-text)', fontWeight: 'bold' }}>
             {isLive ? '🔴 LIVE' : '⏸️ Buffering'}
+          </span>
+          {lastUpdateTime > 0 && (
+            <span>
+              Last update: {new Date(lastUpdateTime).toLocaleTimeString()} ({Math.floor((Date.now() - lastUpdateTime) / 1000)}s ago)
+            </span>
+          )}
+          <span>
+            Marker: {new Date(renderMarkerTime * 1000).toLocaleTimeString()} ({markerGapSeconds}s lag)
+          </span>
+          <span>
+            Pending: {timelinePending}
           </span>
         </div>
       )}

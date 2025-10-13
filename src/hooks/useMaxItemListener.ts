@@ -22,6 +22,7 @@ export const useMaxItemListener = () => {
   const [timelineBuffer, setTimelineBuffer] = useState<Item[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [lastUpdateTime, setLastUpdateTime] = useState<number>(0);
   const prevMaxId = useRef<number | null>(null);
   const isInitialized = useRef(false);
 
@@ -34,6 +35,7 @@ export const useMaxItemListener = () => {
       maxItemRef,
       async (snapshot) => {
         const newMaxId = snapshot.val() as number;
+        setLastUpdateTime(Date.now());
 
         // Initialize on first load - fetch recent items to populate timeline
         if (!isInitialized.current) {
@@ -121,6 +123,7 @@ export const useMaxItemListener = () => {
     timelineBuffer,
     error,
     loading,
+    lastUpdateTime,
   };
 };
 

@@ -11,10 +11,10 @@ export const useLiveStories = () => {
   const [items, setItems] = useState<Item[]>([]);
 
   // Get timeline buffer from Firebase listener
-  const { timelineBuffer, error, loading } = useMaxItemListener();
+  const { timelineBuffer, error, loading, lastUpdateTime } = useMaxItemListener();
 
   // Get displayed items from timeline renderer
-  const { displayedItems, renderMarkerTime, timelinePending, isLive } = useTimelineRenderer(timelineBuffer);
+  const { displayedItems, renderMarkerTime, timelinePending, isLive, markerGapSeconds } = useTimelineRenderer(timelineBuffer);
 
   // Apply visited status to displayed items directly
   useEffect(() => {
@@ -30,11 +30,6 @@ export const useLiveStories = () => {
 
     // Limit total number of items to prevent memory issues
     const limitedItems = markedItems.slice(0, MAX_ITEMS_DISPLAYED);
-
-    console.log('[useLiveStories] Setting items', {
-      displayedItemsCount: displayedItems.length,
-      finalItemsCount: limitedItems.length
-    });
 
     setItems(limitedItems);
   }, [displayedItems]);
@@ -73,6 +68,8 @@ export const useLiveStories = () => {
     renderMarkerTime,
     timelinePending,
     isLive,
+    lastUpdateTime,
+    markerGapSeconds,
   };
 };
 
