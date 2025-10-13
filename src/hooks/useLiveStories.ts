@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { getItemsBatch } from '../api/hackernews';
-import { Item } from '../types';
-import { getVisitedStories } from '../utils/visitedStories';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { getItemsBatch } from "../api/hackernews";
+import { Item } from "../types";
+import { getVisitedStories } from "../utils/visitedStories";
 
 const INITIAL_ITEMS_TO_FETCH = 100;
-const DISPLAY_DELAY_MS = 30000; // 30 seconds
+const DISPLAY_DELAY_MS = 10000; // 10 seconds
 const MAX_DISPLAYED_ITEMS = 200;
-const VISITED_STORIES_KEY = 'hn-visited-stories';
+const VISITED_STORIES_KEY = "hn-visited-stories";
 const POLL_INTERVAL_MS = 2000; // Poll for new items every 2 seconds
-const HN_API_BASE = 'https://hacker-news.firebaseio.com/v0';
+const HN_API_BASE = "https://hacker-news.firebaseio.com/v0";
 
 export const useLiveStories = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -26,7 +26,7 @@ export const useLiveStories = () => {
   useEffect(() => {
     const timeouts = scheduledTimeouts.current;
     return () => {
-      timeouts.forEach(timeoutId => clearTimeout(timeoutId));
+      timeouts.forEach((timeoutId) => clearTimeout(timeoutId));
       timeouts.clear();
     };
   }, []);
@@ -35,13 +35,17 @@ export const useLiveStories = () => {
   useEffect(() => {
     const updateVisitedStatus = () => {
       const visitedIds = getVisitedStories();
-      setItems(prevItems =>
-        prevItems.map(item => {
-          if (item.type === 'story' && visitedIds.includes(item.id) && !item.visited) {
+      setItems((prevItems) =>
+        prevItems.map((item) => {
+          if (
+            item.type === "story" &&
+            visitedIds.includes(item.id) &&
+            !item.visited
+          ) {
             return { ...item, visited: true };
           }
           return item;
-        })
+        }),
       );
     };
 
@@ -51,8 +55,8 @@ export const useLiveStories = () => {
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   // Update pending count
@@ -63,7 +67,10 @@ export const useLiveStories = () => {
 
   // Schedule an item to be displayed
   const scheduleItem = useCallback((item: Item, delayMs: number) => {
-    if (displayedIds.current.has(item.id) || scheduledTimeouts.current.has(item.id)) {
+    if (
+      displayedIds.current.has(item.id) ||
+      scheduledTimeouts.current.has(item.id)
+    ) {
       return;
     }
 
@@ -73,11 +80,12 @@ export const useLiveStories = () => {
 
       // Apply visited status
       const visitedIds = getVisitedStories();
-      const itemWithVisited = item.type === 'story' && visitedIds.includes(item.id)
-        ? { ...item, visited: true }
-        : item;
+      const itemWithVisited =
+        item.type === "story" && visitedIds.includes(item.id)
+          ? { ...item, visited: true }
+          : item;
 
-      setItems(prev => {
+      setItems((prev) => {
         const updated = [itemWithVisited, ...prev];
         // Sort by ID descending (newest first) to maintain proper order
         updated.sort((a, b) => b.id - a.id);
@@ -99,7 +107,7 @@ export const useLiveStories = () => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const newMaxId = await response.json() as number;
+        const newMaxId = (await response.json()) as number;
         setLastUpdateTime(Date.now());
 
         // Initial load: fetch recent items
@@ -112,12 +120,16 @@ export const useLiveStories = () => {
 
             // Fetch the last N items
             const idsToFetch: number[] = [];
-            for (let id = newMaxId; id > newMaxId - INITIAL_ITEMS_TO_FETCH && id > 0; id--) {
+            for (
+              let id = newMaxId;
+              id > newMaxId - INITIAL_ITEMS_TO_FETCH && id > 0;
+              id--
+            ) {
               idsToFetch.push(id);
             }
 
             const fetchedItems = await getItemsBatch(idsToFetch);
-            const validItems = fetchedItems.filter(item => item && item.id);
+            const validItems = fetchedItems.filter((item) => item && item.id);
 
             // Sort by ID descending (newest first)
             validItems.sort((a, b) => b.id - a.id);
@@ -125,9 +137,9 @@ export const useLiveStories = () => {
             // Only show items from the last 10 minutes on initial load
             // This prevents old items from flashing on screen
             const now = Date.now() / 1000; // Current time in seconds
-            const tenMinutesAgo = now - (10 * 60); // 10 minutes in seconds
-            const recentItems = validItems.filter(item =>
-              item.time && item.time >= tenMinutesAgo
+            const tenMinutesAgo = now - 10 * 60; // 10 minutes in seconds
+            const recentItems = validItems.filter(
+              (item) => item.time && item.time >= tenMinutesAgo,
             );
 
             // Stagger items to create a flow on initial load
@@ -148,8 +160,12 @@ export const useLiveStories = () => {
 
             setLoading(false);
           } catch (err) {
-            console.error('Error fetching initial items:', err);
-            setError(err instanceof Error ? err : new Error('Failed to fetch initial items'));
+            console.error("Error fetching initial items:", err);
+            setError(
+              err instanceof Error
+                ? err
+                : new Error("Failed to fetch initial items"),
+            );
             setLoading(false);
           }
           return;
@@ -160,22 +176,25 @@ export const useLiveStories = () => {
           try {
             const idsToFetch: number[] = [];
             const delta = newMaxId - prevMaxId.current;
-            const startId = delta > 50 ? newMaxId - 50 + 1 : prevMaxId.current + 1;
+            const startId =
+              delta > 50 ? newMaxId - 50 + 1 : prevMaxId.current + 1;
 
             for (let id = startId; id <= newMaxId; id++) {
               idsToFetch.push(id);
             }
 
             const fetchedItems = await getItemsBatch(idsToFetch);
-            const validItems = fetchedItems.filter(item => item && item.id);
+            const validItems = fetchedItems.filter((item) => item && item.id);
 
             // Schedule each new item with delay based on creation time
             // This preserves the relative timing between items for a streaming effect
             if (validItems.length > 0) {
               // Find the oldest item timestamp
-              const oldestTime = Math.min(...validItems.map(item => item.time || 0));
+              const oldestTime = Math.min(
+                ...validItems.map((item) => item.time || 0),
+              );
 
-              validItems.forEach(item => {
+              validItems.forEach((item) => {
                 if (item.time) {
                   // Calculate delay: base delay + time since oldest item
                   const relativeAge = (item.time - oldestTime) * 1000; // Convert to ms
@@ -188,15 +207,23 @@ export const useLiveStories = () => {
               });
             }
           } catch (err) {
-            console.error('Error fetching new items:', err);
-            setError(err instanceof Error ? err : new Error('Failed to fetch new items'));
+            console.error("Error fetching new items:", err);
+            setError(
+              err instanceof Error
+                ? err
+                : new Error("Failed to fetch new items"),
+            );
           }
         }
 
         prevMaxId.current = newMaxId;
       } catch (err) {
-        console.error('Error polling maxitem:', err);
-        setError(err instanceof Error ? err : new Error('Failed to poll for new items'));
+        console.error("Error polling maxitem:", err);
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("Failed to poll for new items"),
+        );
       }
     };
 
