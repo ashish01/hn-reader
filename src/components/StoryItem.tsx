@@ -1,7 +1,7 @@
 import React from "react";
 import { Story } from "../types";
 import { formatTime, formatUrl } from "../utils/formatters";
-import { markStoryAsVisited } from "../utils/visitedStories";
+import useAppStore from "../store/useAppStore";
 
 interface StoryItemProps {
   story: Story;
@@ -12,18 +12,21 @@ const StoryItem: React.FC<StoryItemProps> = ({
   story,
   onClick,
 }) => {
+  const visitedStoryIds = useAppStore((state) => state.visitedStoryIds);
+  const markStoryVisited = useAppStore((state) => state.markStoryVisited);
+
   const handleClick = () => {
     onClick(story.id);
   };
 
   const handleUrlClick = () => {
-    markStoryAsVisited(story.id);
+    markStoryVisited(story.id);
   };
 
   // Determine the appropriate class based on visited status
   const getStoryItemClass = () => {
     let className = "story-item";
-    if (story.visited) {
+    if (visitedStoryIds.includes(story.id)) {
       className += " visited-story";
     }
     return className;

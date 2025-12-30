@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import {
   Routes,
   Route,
@@ -7,7 +7,7 @@ import {
   useLocation,
   Link,
 } from "react-router-dom";
-import { markStoryAsVisited } from "./utils/visitedStories";
+import useAppStore from "./store/useAppStore";
 import "./index.css";
 import "./App.css";
 
@@ -36,13 +36,14 @@ function StoryRoute() {
 // Stories page with pagination
 function StoriesRoute() {
   const navigate = useNavigate();
+  const markStoryVisited = useAppStore((state) => state.markStoryVisited);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const pageParam = queryParams.get("page");
   const currentPage = pageParam ? parseInt(pageParam, 10) : 0;
 
   const handleStorySelect = (id: number) => {
-    markStoryAsVisited(id);
+    markStoryVisited(id);
     navigate(`/story/${id}`);
   };
 
@@ -62,9 +63,10 @@ function StoriesRoute() {
 // Live stories page
 function LiveStoriesRoute() {
   const navigate = useNavigate();
+  const markStoryVisited = useAppStore((state) => state.markStoryVisited);
 
   const handleStorySelect = (id: number) => {
-    markStoryAsVisited(id);
+    markStoryVisited(id);
     navigate(`/story/${id}`);
   };
 
@@ -72,11 +74,8 @@ function LiveStoriesRoute() {
 }
 
 function App() {
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    // Check for saved preference or default to false
-    const savedMode = localStorage.getItem("darkMode");
-    return savedMode === "true";
-  });
+  const darkMode = useAppStore((state) => state.darkMode);
+  const toggleDarkMode = useAppStore((state) => state.toggleDarkMode);
 
   // Apply dark mode class to the body
   useEffect(() => {
@@ -85,14 +84,7 @@ function App() {
     } else {
       document.body.classList.remove("dark-mode");
     }
-
-    // Save preference to localStorage
-    localStorage.setItem("darkMode", darkMode.toString());
   }, [darkMode]);
-
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev);
-  };
 
   return (
     <div className="app">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import { Comment as CommentType } from "../types";
 import { formatTime } from "../utils/formatters";
 
@@ -22,11 +22,7 @@ const Comment: React.FC<CommentProps> = ({
   onLoadChildren,
   level = 0,
 }) => {
-  const [expanded, setExpanded] = useState(comment.isExpanded);
-
-  useEffect(() => {
-    setExpanded(comment.isExpanded);
-  }, [comment.isExpanded]);
+  const expanded = comment.isExpanded;
 
   const handleToggle = useCallback(() => {
     onToggle(comment.id);

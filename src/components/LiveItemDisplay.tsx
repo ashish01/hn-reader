@@ -1,6 +1,7 @@
 import React from 'react';
 import { Item } from '../types';
 import { formatTime, formatUrl } from '../utils/formatters';
+import useAppStore from '../store/useAppStore';
 
 interface LiveItemDisplayProps {
   item: Item;
@@ -8,10 +9,12 @@ interface LiveItemDisplayProps {
 }
 
 const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick }) => {
+  const visitedStoryIds = useAppStore((state) => state.visitedStoryIds);
+
   const renderItemContent = () => {
     switch (item.type) {
       case 'story': {
-        const isVisited = item.visited;
+        const isVisited = visitedStoryIds.includes(item.id);
         const handleClick = () => {
           if (onStoryClick) {
             onStoryClick(item.id);
