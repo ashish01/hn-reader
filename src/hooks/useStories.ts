@@ -18,11 +18,11 @@ export const useStories = (
   }, [fetchStories, page, itemsPerPage]);
 
   return {
-    stories: stories.filter(Boolean),
+    stories,
     loading,
     error,
     totalStories,
-    totalPages: Math.ceil(totalStories / itemsPerPage),
+    totalPages: Math.max(1, Math.ceil(totalStories / itemsPerPage)),
     currentPage: currentPage ?? page,
   };
 };

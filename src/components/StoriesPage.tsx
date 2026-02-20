@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import StoryItem from './StoryItem';
 import useStories from '../hooks/useStories';
 import { STORIES_PER_PAGE } from '../utils/constants';
@@ -6,13 +7,11 @@ import { STORIES_PER_PAGE } from '../utils/constants';
 interface StoriesPageProps {
   onStorySelect: (id: number) => void;
   page: number;
-  onPageChange: (page: number) => void;
 }
 
 const StoriesPage: React.FC<StoriesPageProps> = ({ 
   onStorySelect, 
-  page, 
-  onPageChange 
+  page
 }) => {
   const {
     stories,
@@ -26,18 +25,21 @@ const StoriesPage: React.FC<StoriesPageProps> = ({
   // Calculate the starting index for the current page
   const startIndex = currentPage * STORIES_PER_PAGE;
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages - 1) {
-      onPageChange(currentPage + 1);
-      window.scrollTo(0, 0);
-    }
-  };
+  const getPagePath = (targetPage: number) =>
+    targetPage <= 0 ? '/' : `/?page=${targetPage}`;
 
-  const handlePrevPage = () => {
-    if (currentPage > 0) {
-      onPageChange(currentPage - 1);
-      window.scrollTo(0, 0);
+  const handlePageClick: React.MouseEventHandler<HTMLAnchorElement> = (event) => {
+    if (
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0
+    ) {
+      return;
     }
+
+    window.scrollTo(0, 0);
   };
 
   if (error) {
@@ -51,15 +53,19 @@ const StoriesPage: React.FC<StoriesPageProps> = ({
       <div className="stories-controls">
         <div className="stories-nav">
           {currentPage > 0 && (
-            <button onClick={handlePrevPage}>← Previous</button>
+            <Link to={getPagePath(currentPage - 1)} onClick={handlePageClick}>
+              ← Previous
+            </Link>
           )}
 
           {currentPage < totalPages - 1 && (
-            <button onClick={handleNextPage}>Next →</button>
+            <Link to={getPagePath(currentPage + 1)} onClick={handlePageClick}>
+              Next →
+            </Link>
           )}
         </div>
         
-        <div className="page-info">
+        <div className="page-info" aria-live="polite">
           {loading && stories.length === 0 ? 'Loading stories...' : (
             <>
               Page {currentPage + 1} of {totalPages}
@@ -97,11 +103,15 @@ const StoriesPage: React.FC<StoriesPageProps> = ({
         <div className="stories-controls stories-controls-bottom">
           <div className="stories-nav">
             {currentPage > 0 && (
-              <button onClick={handlePrevPage}>← Previous</button>
+              <Link to={getPagePath(currentPage - 1)} onClick={handlePageClick}>
+                ← Previous
+              </Link>
             )}
 
             {currentPage < totalPages - 1 && (
-              <button onClick={handleNextPage}>Next →</button>
+              <Link to={getPagePath(currentPage + 1)} onClick={handlePageClick}>
+                Next →
+              </Link>
             )}
           </div>
         </div>

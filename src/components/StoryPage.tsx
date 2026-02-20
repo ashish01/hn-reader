@@ -1,14 +1,23 @@
 import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import useStoryWithComments from "../hooks/useStoryWithComments";
 import Comment from "./Comment";
 import { formatTime, formatUrl } from "../utils/formatters";
 
 interface StoryPageProps {
   storyId: number;
-  onBack: () => void;
 }
 
-const StoryPage: React.FC<StoryPageProps> = ({ storyId, onBack }) => {
+interface StoryPageLocationState {
+  from?: {
+    pathname: string;
+    search?: string;
+    hash?: string;
+  };
+}
+
+const StoryPage: React.FC<StoryPageProps> = ({ storyId }) => {
+  const location = useLocation();
   const {
     story,
     comments,
@@ -32,18 +41,24 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId, onBack }) => {
   }
 
   // Use the story's descendant count directly instead of the current loaded comment count
-  const commentCount = story.descendants || 0;
+  const commentCount = story.descendants ?? 0;
+  const locationState = location.state as StoryPageLocationState | null;
+  const from = locationState?.from;
+  const backTo = from
+    ? `${from.pathname}${from.search || ""}${from.hash || ""}`
+    : "/";
 
   return (
     <div className="story-page">
-      <button className="back-button" onClick={onBack}>
+      <Link className="back-button" to={backTo}>
         ← Back to stories
-      </button>
+      </Link>
 
       <div className="story-details">
         <h1>
           <a
             href={`https://news.ycombinator.com/item?id=${story.id}`}
+            target="_blank"
             rel="noopener noreferrer"
           >
             {story.title}
@@ -52,7 +67,7 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId, onBack }) => {
 
         {story.url && (
           <div className="story-url">
-            <a href={story.url} rel="noopener noreferrer">
+            <a href={story.url} target="_blank" rel="noopener noreferrer">
               {formatUrl(story.url)}
             </a>
           </div>
@@ -94,7 +109,9 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId, onBack }) => {
         )}
 
         {loadingComments && comments.length === 0 && (
-          <div className="loading-comments">Loading comments...</div>
+          <div className="loading-comments" aria-live="polite">
+            Loading comments...
+          </div>
         )}
       </div>
     </div>

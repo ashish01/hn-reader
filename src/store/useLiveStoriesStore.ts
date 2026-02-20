@@ -14,7 +14,6 @@ interface LiveStoriesState {
   error: Error | null;
   loading: boolean;
   pendingCount: number;
-  lastUpdateTime: number;
   start: () => void;
   stop: () => void;
 }
@@ -38,7 +37,6 @@ const useLiveStoriesStore = create<LiveStoriesState>((set) => {
       error: null,
       loading: true,
       pendingCount: 0,
-      lastUpdateTime: 0,
     });
   };
 
@@ -109,7 +107,6 @@ const useLiveStoriesStore = create<LiveStoriesState>((set) => {
       }
       const newMaxId = (await response.json()) as number;
       if (!isRunning) return;
-      set({ lastUpdateTime: Date.now() });
 
       if (!isInitialized) {
         isInitialized = true;
@@ -195,6 +192,10 @@ const useLiveStoriesStore = create<LiveStoriesState>((set) => {
   };
 
   const start = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
     if (pollIntervalId !== null || tickIntervalId !== null) {
       return;
     }
@@ -222,7 +223,6 @@ const useLiveStoriesStore = create<LiveStoriesState>((set) => {
     error: null,
     loading: true,
     pendingCount: 0,
-    lastUpdateTime: 0,
     start,
     stop,
   };

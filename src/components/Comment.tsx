@@ -10,7 +10,7 @@ interface CommentProps {
     isLoading?: boolean;
   };
   onToggle: (id: number) => void;
-  onLoadChildren: (id: number) => void;
+  onLoadChildren: (id: number) => void | Promise<void>;
   level?: number;
 }
 
@@ -22,7 +22,7 @@ const Comment: React.FC<CommentProps> = ({
   onLoadChildren,
   level = 0,
 }) => {
-  const expanded = comment.isExpanded;
+  const expanded = comment.isExpanded ?? true;
 
   const handleToggle = useCallback(() => {
     onToggle(comment.id);
@@ -32,7 +32,7 @@ const Comment: React.FC<CommentProps> = ({
     if (!comment.childrenLoaded && comment.kids && comment.kids.length > 0) {
       onLoadChildren(comment.id);
     }
-  }, [comment, onLoadChildren]);
+  }, [comment.childrenLoaded, comment.id, comment.kids, onLoadChildren]);
 
   // If the comment is deleted or dead, show minimal content
   if (comment.deleted || comment.dead) {
@@ -58,14 +58,22 @@ const Comment: React.FC<CommentProps> = ({
   return (
     <div className={combinedClasses}>
       <div className="comment-header">
-        <span className="comment-author">{comment.by}</span>
+        <span className="comment-author">{comment.by || "unknown"}</span>
         <a
           href={`https://news.ycombinator.com/item?id=${comment.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="comment-time"
         >
           {formatTime(comment.time)}
         </a>
-        <button className="comment-toggle" onClick={handleToggle}>
+        <button
+          type="button"
+          className="comment-toggle"
+          onClick={handleToggle}
+          aria-label={expanded ? "Collapse comment" : "Expand comment"}
+          aria-expanded={expanded}
+        >
           {expanded ? "[-]" : "[+]"}
         </button>
       </div>
@@ -81,6 +89,7 @@ const Comment: React.FC<CommentProps> = ({
             comment.kids.length > 0 &&
             !comment.childrenLoaded && (
               <button
+                type="button"
                 className={`load-more-button ${comment.isLoading ? "loading" : ""}`}
                 onClick={handleLoadChildren}
                 disabled={comment.isLoading}

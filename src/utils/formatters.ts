@@ -6,15 +6,16 @@ import { getDomain } from "tldts";
 export const formatTime = (time: number | undefined): string => {
   if (!time) return "";
 
-  const date = new Date(time * 1000);
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const diffSeconds = nowSeconds - time;
+  const clampedDiff = Math.max(diffSeconds, 0);
+  const minutes = Math.floor(clampedDiff / 60);
+  const hours = Math.floor(clampedDiff / 3600);
+  const days = Math.floor(clampedDiff / 86400);
 
   if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
   if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  if (minutes <= 0) return "just now";
   return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
 };
 

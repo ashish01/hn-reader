@@ -29,6 +29,10 @@ const getStoredCommentState = (
   storyId: number,
   commentId: number,
 ): boolean | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   try {
     const key = getCommentKey(storyId, commentId);
     const storedValue = localStorage.getItem(key);
@@ -44,6 +48,10 @@ const saveCommentState = (
   commentId: number,
   isExpanded: boolean,
 ) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
   try {
     const key = getCommentKey(storyId, commentId);
     localStorage.setItem(key, isExpanded.toString());
@@ -250,16 +258,6 @@ const useStoryWithCommentsStore = create<StoryWithCommentsState>((set, get) => (
           (comment) => ({
             ...comment,
             children: orderedChildren,
-          }),
-          state.comments,
-        ),
-      }));
-
-      set((state) => ({
-        comments: updateCommentInTree(
-          commentId,
-          (comment) => ({
-            ...comment,
             childrenLoaded: true,
             isLoading: false,
           }),

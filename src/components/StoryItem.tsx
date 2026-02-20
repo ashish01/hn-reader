@@ -1,4 +1,5 @@
 import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Story } from "../types";
 import { formatTime, formatUrl } from "../utils/formatters";
 import useAppStore from "../store/useAppStore";
@@ -14,6 +15,16 @@ const StoryItem: React.FC<StoryItemProps> = ({
 }) => {
   const visitedStoryIds = useAppStore((state) => state.visitedStoryIds);
   const markStoryVisited = useAppStore((state) => state.markStoryVisited);
+  const location = useLocation();
+  const storyPath = `/story/${story.id}`;
+  const storyLinkState = {
+    from: {
+      pathname: location.pathname,
+      search: location.search,
+      hash: location.hash,
+    },
+  };
+  const isVisited = visitedStoryIds.includes(story.id);
 
   const handleClick = () => {
     onClick(story.id);
@@ -23,44 +34,44 @@ const StoryItem: React.FC<StoryItemProps> = ({
     markStoryVisited(story.id);
   };
 
-  // Determine the appropriate class based on visited status
-  const getStoryItemClass = () => {
-    let className = "story-item";
-    if (visitedStoryIds.includes(story.id)) {
-      className += " visited-story";
-    }
-    return className;
-  };
-
   return (
-    <div className={getStoryItemClass()}>
+    <div className={isVisited ? "story-item visited-story" : "story-item"}>
       <div className="story-title">
         <div className="story-title-row">
           {story.url ? (
             <a
               href={story.url}
+              target="_blank"
               rel="noopener noreferrer"
               onClick={handleUrlClick}
             >
               {story.title}
             </a>
           ) : (
-            <button onClick={handleClick} className="story-title-button">
+            <Link
+              to={storyPath}
+              state={storyLinkState}
+              onClick={handleClick}
+              className="story-title-link"
+            >
               {story.title}
-            </button>
+            </Link>
           )}
-          {story.url && (
-            <span className="story-domain">({formatUrl(story.url)})</span>
-          )}
+          {story.url && <span className="story-domain">({formatUrl(story.url)})</span>}
         </div>
       </div>
       <div className="story-info">
         <span>{story.score} points</span>
         <span>by {story.by}</span>
         <span>{formatTime(story.time)}</span>
-        <button className="story-comments-link" onClick={handleClick}>
-          {story.descendants || 0} comments
-        </button>
+        <Link
+          to={storyPath}
+          state={storyLinkState}
+          className="story-comments-link"
+          onClick={handleClick}
+        >
+          {story.descendants ?? 0} comments
+        </Link>
       </div>
     </div>
   );

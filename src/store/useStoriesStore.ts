@@ -42,27 +42,20 @@ const useStoriesStore = create<StoriesState>((set) => ({
       const endIndex = startIndex + itemsPerPage;
       const paginatedIds = allStoryIds.slice(startIndex, endIndex);
 
-      const storyPromises = paginatedIds.map(async (id, index) => {
+      const storyPromises = paginatedIds.map(async (id) => {
         try {
-          const story = await getStory(id);
-          if (requestId !== storiesRequestId) return null;
-
-          set((state) => {
-            const nextStories = [...state.stories];
-            nextStories[index] = story;
-            return { stories: nextStories };
-          });
-
-          return story;
+          return await getStory(id);
         } catch (err) {
           console.error(`Error fetching story ${id}:`, err);
           return null;
         }
       });
 
-      await Promise.all(storyPromises);
+      const fetchedStories = await Promise.all(storyPromises);
       if (requestId !== storiesRequestId) return;
-      set({ loading: false });
+
+      const stories = fetchedStories.filter((story): story is Story => story !== null);
+      set({ stories, loading: false });
     } catch (err) {
       if (requestId !== storiesRequestId) return;
       set({

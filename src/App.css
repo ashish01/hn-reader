@@ -13,12 +13,23 @@ a:visited {
     color: var(--link-visited);
 }
 
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--hn-orange);
+    outline-offset: 2px;
+}
+
 .app {
     max-width: 1200px;
     margin: 0 auto;
     padding: 4px 2px;
     min-height: 100vh;
     background-color: var(--background-color);
+}
+
+.app-loading-fallback {
+    padding: 20px;
+    text-align: center;
 }
 
 /* Header */
@@ -29,6 +40,11 @@ a:visited {
     padding-bottom: 4px;
     margin-bottom: 6px;
     border-bottom: 1px solid var(--border-color);
+}
+
+.app-header-actions {
+    display: flex;
+    gap: 10px;
 }
 
 .app-title {
@@ -60,6 +76,25 @@ a:visited {
 
 .theme-toggle:hover {
     background-color: rgba(0, 0, 0, 0.05);
+}
+
+.theme-toggle:visited {
+    color: var(--text-color);
+}
+
+.live-status-bar {
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--light-text);
+    font-family: monospace;
+}
+
+.live-status-label {
+    font-weight: 700;
 }
 
 /* Footer */
@@ -95,7 +130,6 @@ a:visited {
 
 .story-item {
     flex: 1;
-    cursor: pointer;
     padding: 0.1875rem 0.3125rem;
     margin: 0 -0.25rem;
     border-radius: 0.25rem;
@@ -111,7 +145,8 @@ a:visited {
     opacity: 0.7;
 }
 
-.visited-story .story-title a {
+.visited-story .story-title a,
+.visited-story .story-title-link {
     color: var(--link-visited);
 }
 
@@ -129,22 +164,21 @@ a:visited {
 
 /* Style for the story title link */
 .story-title a,
-.story-title-button {
+.story-title-link {
     /* Replaces text-gray-900 dark:text-gray-100 */
     color: var(--text-color);
     text-decoration: none;
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
     text-align: left;
 }
 
 .story-title a:hover,
-.story-title-button:hover {
+.story-title-link:hover {
     /* Replaces hover:underline */
     text-decoration: underline;
+}
+
+.story-title-link:visited {
+    color: var(--text-color);
 }
 
 .story-domain {
@@ -167,18 +201,61 @@ a:visited {
 
 /* Style for the comments link within story-info */
 .story-comments-link {
-    /* Replaces hover:underline cursor-auto */
-    color: var(--light-text); /* Inherit color */
+    color: var(--light-text);
     text-decoration: none;
-    cursor: pointer; /* Make it clear it's clickable */
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
+}
+
+.story-comments-link:visited {
+    color: var(--light-text);
 }
 
 .story-comments-link:hover {
     text-decoration: underline;
+}
+
+.live-item-link {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.live-item-meta {
+    font-size: 11px;
+    color: var(--light-text);
+    margin-top: 4px;
+}
+
+.item-kind {
+    color: var(--light-text);
+}
+
+.item-kind-story {
+    color: var(--hn-orange);
+}
+
+.item-kind-muted {
+    color: var(--light-text);
+}
+
+.muted-link {
+    color: var(--light-text);
+    text-decoration: none;
+}
+
+.muted-link:hover {
+    text-decoration: underline;
+}
+
+.muted-link:visited {
+    color: var(--light-text);
+}
+
+.item-title-text {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.item-body-block {
+    margin-top: 8px;
 }
 
 /* Navigation */
@@ -194,21 +271,17 @@ a:visited {
     gap: 10px;
 }
 
-.stories-nav a,
-.stories-nav button {
+.stories-nav a {
     background: none;
-    border: none;
     padding: 0;
     font: inherit;
-    cursor: pointer;
     color: var(--hn-orange);
     font-size: 14px;
     font-weight: 500;
     text-decoration: none;
 }
 
-.stories-nav a:hover,
-.stories-nav button:hover {
+.stories-nav a:hover {
     text-decoration: underline;
 }
 
@@ -223,19 +296,21 @@ a:visited {
 
 /* Story page */
 .back-button {
-    background: none;
-    border: none;
     color: var(--link-color);
-    cursor: pointer;
     font-size: 14px;
     margin-bottom: 20px;
     padding: 0;
     display: flex;
     align-items: center;
+    text-decoration: none;
 }
 
 .back-button:hover {
     text-decoration: underline;
+}
+
+.back-button:visited {
+    color: var(--link-color);
 }
 
 .story-details {

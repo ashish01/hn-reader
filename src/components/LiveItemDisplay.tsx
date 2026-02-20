@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Item } from '../types';
 import { formatTime, formatUrl } from '../utils/formatters';
 import useAppStore from '../store/useAppStore';
@@ -10,6 +11,15 @@ interface LiveItemDisplayProps {
 
 const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick }) => {
   const visitedStoryIds = useAppStore((state) => state.visitedStoryIds);
+  const location = useLocation();
+  const storyPath = `/story/${item.id}`;
+  const storyLinkState = {
+    from: {
+      pathname: location.pathname,
+      search: location.search,
+      hash: location.hash,
+    },
+  };
 
   const renderItemContent = () => {
     switch (item.type) {
@@ -28,7 +38,7 @@ const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick })
               <span>•</span>
               <span>{formatTime(item.time)}</span>
               <span>•</span>
-              <span style={{ color: 'var(--hn-orange)' }}>story</span>
+              <span className="item-kind item-kind-story">story</span>
             </div>
             <div className="comment-content">
               {item.url ? (
@@ -37,44 +47,36 @@ const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick })
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ fontWeight: 500, fontSize: '14px' }}
+                    onClick={handleClick}
+                    className="live-item-link"
                   >
                     {item.title}
                   </a>
-                  {item.url && (
-                    <span className="story-domain"> ({formatUrl(item.url)})</span>
-                  )}
+                  <span className="story-domain"> ({formatUrl(item.url)})</span>
                 </>
               ) : (
-                <button
+                <Link
+                  to={storyPath}
+                  state={storyLinkState}
                   onClick={handleClick}
-                  className="story-title-button"
-                  style={{ fontWeight: 500, fontSize: '14px' }}
+                  className="story-title-link live-item-link"
                 >
                   {item.title}
-                </button>
+                </Link>
               )}
-              <div style={{ fontSize: '11px', color: 'var(--light-text)', marginTop: '4px' }}>
+              <div className="live-item-meta">
                 {item.score !== undefined && <span>{item.score} points</span>}
                 {item.descendants !== undefined && (
                   <>
                     <span> • </span>
-                    <button
+                    <Link
+                      to={storyPath}
+                      state={storyLinkState}
                       onClick={handleClick}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        padding: 0,
-                        font: 'inherit',
-                        color: 'inherit',
-                        cursor: 'pointer',
-                        textDecoration: 'none'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-                      onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                      className="story-comments-link"
                     >
                       {item.descendants} comments
-                    </button>
+                    </Link>
                   </>
                 )}
               </div>
@@ -95,7 +97,7 @@ const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick })
               <span>•</span>
               <span>{formatTime(item.time)}</span>
               <span>•</span>
-              <span style={{ color: 'var(--light-text)' }}>comment</span>
+              <span className="item-kind item-kind-muted">comment</span>
               {parentId && (
                 <>
                   <span>•</span>
@@ -103,9 +105,7 @@ const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick })
                     href={`https://news.ycombinator.com/item?id=${parentId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ color: 'var(--light-text)', textDecoration: 'none' }}
-                    onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-                    onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                    className="muted-link"
                   >
                     parent
                   </a>
@@ -116,9 +116,7 @@ const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick })
                 href={`https://news.ycombinator.com/item?id=${item.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: 'var(--light-text)', textDecoration: 'none' }}
-                onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-                onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                className="muted-link"
               >
                 on HN
               </a>
@@ -139,7 +137,7 @@ const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick })
               <span>•</span>
               <span>{formatTime(item.time)}</span>
               <span>•</span>
-              <span style={{ color: 'var(--hn-orange)' }}>job</span>
+              <span className="item-kind item-kind-story">job</span>
             </div>
             <div className="comment-content">
               {item.url ? (
@@ -148,20 +146,18 @@ const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick })
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ fontWeight: 500, fontSize: '14px' }}
+                    className="live-item-link"
                   >
                     {item.title}
                   </a>
-                  {item.url && (
-                    <span className="story-domain"> ({formatUrl(item.url)})</span>
-                  )}
+                  <span className="story-domain"> ({formatUrl(item.url)})</span>
                 </>
               ) : (
-                <div style={{ fontWeight: 500, fontSize: '14px' }}>{item.title}</div>
+                <div className="item-title-text">{item.title}</div>
               )}
               {item.text && (
                 <div
-                  style={{ marginTop: '8px' }}
+                  className="item-body-block"
                   dangerouslySetInnerHTML={{ __html: item.text }}
                 />
               )}
@@ -179,18 +175,18 @@ const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick })
               <span>•</span>
               <span>{formatTime(item.time)}</span>
               <span>•</span>
-              <span style={{ color: 'var(--light-text)' }}>{item.type}</span>
+              <span className="item-kind item-kind-muted">{item.type}</span>
             </div>
             <div className="comment-content">
-              {item.title && <div style={{ fontWeight: 500, fontSize: '14px' }}>{item.title}</div>}
+              {item.title && <div className="item-title-text">{item.title}</div>}
               {item.text && (
                 <div
-                  style={{ marginTop: '8px' }}
+                  className="item-body-block"
                   dangerouslySetInnerHTML={{ __html: item.text }}
                 />
               )}
               {item.score !== undefined && (
-                <div style={{ fontSize: '11px', color: 'var(--light-text)', marginTop: '4px' }}>
+                <div className="live-item-meta">
                   {item.score} points
                 </div>
               )}
@@ -207,7 +203,7 @@ const LiveItemDisplay: React.FC<LiveItemDisplayProps> = ({ item, onStoryClick })
               <span>•</span>
               <span>{formatTime(item.time)}</span>
               <span>•</span>
-              <span style={{ color: 'var(--light-text)' }}>{item.type || 'unknown'}</span>
+              <span className="item-kind item-kind-muted">{item.type || 'unknown'}</span>
             </div>
             <div className="comment-content">
               {item.title && <div>{item.title}</div>}

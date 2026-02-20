@@ -2,7 +2,6 @@ import { useEffect, lazy, Suspense } from "react";
 import {
   Routes,
   Route,
-  useNavigate,
   useParams,
   useLocation,
   Link,
@@ -16,58 +15,52 @@ const StoriesPage = lazy(() => import("./components/StoriesPage"));
 const StoryPage = lazy(() => import("./components/StoryPage"));
 const LiveStoriesPage = lazy(() => import("./components/LiveStoriesPage"));
 
+const parseNonNegativeInt = (value: string | null, fallback = 0): number => {
+  if (value === null || value.trim() === "") {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
+};
+
 // Story component with router params
 function StoryRoute() {
   const { storyId } = useParams<{ storyId: string }>();
-  const navigate = useNavigate();
+  const parsedStoryId = storyId ? Number(storyId) : NaN;
 
-  const handleBackToStories = () => {
-    navigate("/");
-  };
+  if (!Number.isInteger(parsedStoryId) || parsedStoryId <= 0) {
+    return <div className="error">Invalid story id</div>;
+  }
 
-  return (
-    <StoryPage
-      storyId={parseInt(storyId || "0", 10)}
-      onBack={handleBackToStories}
-    />
-  );
+  return <StoryPage storyId={parsedStoryId} />;
 }
 
 // Stories page with pagination
 function StoriesRoute() {
-  const navigate = useNavigate();
   const markStoryVisited = useAppStore((state) => state.markStoryVisited);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const pageParam = queryParams.get("page");
-  const currentPage = pageParam ? parseInt(pageParam, 10) : 0;
+  const currentPage = parseNonNegativeInt(queryParams.get("page"));
 
   const handleStorySelect = (id: number) => {
     markStoryVisited(id);
-    navigate(`/story/${id}`);
-  };
-
-  const handlePageChange = (page: number) => {
-    navigate(`/?page=${page}`);
   };
 
   return (
     <StoriesPage
       onStorySelect={handleStorySelect}
       page={currentPage}
-      onPageChange={handlePageChange}
     />
   );
 }
 
 // Live stories page
 function LiveStoriesRoute() {
-  const navigate = useNavigate();
   const markStoryVisited = useAppStore((state) => state.markStoryVisited);
 
   const handleStorySelect = (id: number) => {
     markStoryVisited(id);
-    navigate(`/story/${id}`);
   };
 
   return <LiveStoriesPage onStorySelect={handleStorySelect} />;
@@ -92,8 +85,8 @@ function App() {
         <h1 className="app-title">
           <Link to="/">HN Reader</Link>
         </h1>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="theme-toggle" onClick={toggleDarkMode}>
+        <div className="app-header-actions">
+          <button type="button" className="theme-toggle" onClick={toggleDarkMode}>
             {darkMode ? "Light Mode" : "Dark Mode"}
           </button>
           <Link to="/live" className="theme-toggle">
@@ -103,7 +96,7 @@ function App() {
       </header>
 
       <main>
-        <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Loading...</div>}>
+        <Suspense fallback={<div className="app-loading-fallback">Loading...</div>}>
           <Routes>
             <Route path="/" element={<StoriesRoute />} />
             <Route path="/live" element={<LiveStoriesRoute />} />
