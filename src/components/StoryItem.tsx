@@ -2,19 +2,12 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Story } from "../types";
 import { formatTime, formatUrl } from "../utils/formatters";
-import useAppStore from "../store/useAppStore";
 
 interface StoryItemProps {
   story: Story;
-  onClick: (id: number) => void;
 }
 
-const StoryItem: React.FC<StoryItemProps> = ({
-  story,
-  onClick,
-}) => {
-  const visitedStoryIds = useAppStore((state) => state.visitedStoryIds);
-  const markStoryVisited = useAppStore((state) => state.markStoryVisited);
+const StoryItem: React.FC<StoryItemProps> = ({ story }) => {
   const location = useLocation();
   const storyPath = `/story/${story.id}`;
   const storyLinkState = {
@@ -24,18 +17,9 @@ const StoryItem: React.FC<StoryItemProps> = ({
       hash: location.hash,
     },
   };
-  const isVisited = visitedStoryIds.includes(story.id);
-
-  const handleClick = () => {
-    onClick(story.id);
-  };
-
-  const handleUrlClick = () => {
-    markStoryVisited(story.id);
-  };
 
   return (
-    <div className={isVisited ? "story-item visited-story" : "story-item"}>
+    <div className="story-item">
       <div className="story-title">
         <div className="story-title-row">
           {story.url ? (
@@ -43,7 +27,6 @@ const StoryItem: React.FC<StoryItemProps> = ({
               href={story.url}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={handleUrlClick}
             >
               {story.title}
             </a>
@@ -51,13 +34,14 @@ const StoryItem: React.FC<StoryItemProps> = ({
             <Link
               to={storyPath}
               state={storyLinkState}
-              onClick={handleClick}
               className="story-title-link"
             >
               {story.title}
             </Link>
           )}
-          {story.url && <span className="story-domain">({formatUrl(story.url)})</span>}
+          {story.url && (
+            <span className="story-domain">({formatUrl(story.url)})</span>
+          )}
         </div>
       </div>
       <div className="story-info">
@@ -68,7 +52,6 @@ const StoryItem: React.FC<StoryItemProps> = ({
           to={storyPath}
           state={storyLinkState}
           className="story-comments-link"
-          onClick={handleClick}
         >
           {story.descendants ?? 0} comments
         </Link>
@@ -77,4 +60,4 @@ const StoryItem: React.FC<StoryItemProps> = ({
   );
 };
 
-export default StoryItem;
+export default React.memo(StoryItem);

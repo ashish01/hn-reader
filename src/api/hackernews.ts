@@ -1,95 +1,87 @@
-import axios from 'axios';
-import { Item, Story, Comment, User } from '../types';
+import { Item, Story, Comment } from "../types";
+import { pLimit } from "../utils/pLimit";
 
-const BASE_URL = 'https://hacker-news.firebaseio.com/v0';
+const BASE_URL = "https://hacker-news.firebaseio.com/v0";
 
-export const getItem = async (id: number): Promise<Item> => {
-  const response = await axios.get<Item>(`${BASE_URL}/item/${id}.json`);
-  return response.data;
-};
-
-export const getStory = async (id: number): Promise<Story> => {
-  const response = await axios.get<Story>(`${BASE_URL}/item/${id}.json`);
-  return response.data;
-};
-
-export const getComment = async (id: number): Promise<Comment> => {
-  const response = await axios.get<Comment>(`${BASE_URL}/item/${id}.json`);
-  return response.data;
-};
-
-export const getUser = async (id: string): Promise<User> => {
-  const response = await axios.get<User>(`${BASE_URL}/user/${id}.json`);
-  return response.data;
-};
-
-export const getTopStories = async (limit: number = 30): Promise<number[]> => {
-  const response = await axios.get<number[]>(`${BASE_URL}/topstories.json`);
-  return response.data.slice(0, limit);
-};
-
-export const getNewStories = async (limit: number = 30): Promise<number[]> => {
-  const response = await axios.get<number[]>(`${BASE_URL}/newstories.json`);
-  return response.data.slice(0, limit);
-};
-
-export const getBestStories = async (limit: number = 30): Promise<number[]> => {
-  const response = await axios.get<number[]>(`${BASE_URL}/beststories.json`);
-  return response.data.slice(0, limit);
-};
-
-// Fetch a story with its comments (one level)
-export const getStoryWithComments = async (id: number): Promise<{ story: Story, comments: Comment[] }> => {
-  const story = await getStory(id);
-  
-  if (!story.kids || story.kids.length === 0) {
-    return { story, comments: [] };
+const fetchJson = async <T>(url: string, signal?: AbortSignal): Promise<T> => {
+  const response = await fetch(url, { signal });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
-  
-  const comments = await Promise.all(
-    story.kids.map(kidId => getComment(kidId))
-  );
-  
-  return { story, comments };
+  return response.json() as Promise<T>;
 };
 
-// Prefetch next level comments for a given comment
-export const getCommentChildren = async (commentId: number): Promise<Comment[]> => {
-  const comment = await getComment(commentId);
-
-  if (!comment.kids || comment.kids.length === 0) {
-    return [];
-  }
-
-  return Promise.all(
-    comment.kids.map(kidId => getComment(kidId))
-  );
+/**
+ * Generic item fetcher — single function for story, comment, or any item.
+ */
+export const fetchItem = async <T extends Item = Item>(
+  id: number,
+  signal?: AbortSignal,
+): Promise<T> => {
+  return fetchJson<T>(`${BASE_URL}/item/${id}.json`, signal);
 };
 
-// Fetch multiple items in parallel and filter out null/deleted items
-export const getItemsBatch = async (ids: number[]): Promise<Item[]> => {
+export const getStory = async (
+  id: number,
+  signal?: AbortSignal,
+): Promise<Story> => {
+  return fetchItem<Story>(id, signal);
+};
+
+export const getComment = async (
+  id: number,
+  signal?: AbortSignal,
+): Promise<Comment> => {
+  return fetchItem<Comment>(id, signal);
+};
+
+export const getTopStories = async (
+  limit: number = 30,
+  signal?: AbortSignal,
+): Promise<number[]> => {
+  const ids = await fetchJson<number[]>(
+    `${BASE_URL}/topstories.json`,
+    signal,
+  );
+  return ids.slice(0, limit);
+};
+
+/**
+ * Fetch multiple items in parallel (capped at 15 concurrent requests).
+ * Filters out null/deleted/dead items.
+ */
+export const getItemsBatch = async (
+  ids: number[],
+  signal?: AbortSignal,
+): Promise<Item[]> => {
+  const limit = pLimit(15);
+
   const items = await Promise.all(
-    ids.map(async (id) => {
-      try {
-        const item = await getItem(id);
-        // Filter out deleted or dead items
-        if (item && !item.deleted && !item.dead) {
-          return item;
+    ids.map((id) =>
+      limit(async () => {
+        try {
+          const item = await fetchItem(id, signal);
+          if (item && !item.deleted && !item.dead) {
+            return item;
+          }
+          return null;
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") {
+            throw error;
+          }
+          console.error(`Error fetching item ${id}:`, error);
+          return null;
         }
-        return null;
-      } catch (error) {
-        console.error(`Error fetching item ${id}:`, error);
-        return null;
-      }
-    })
+      }),
+    ),
   );
 
-  // Filter out null values
   return items.filter((item): item is Item => item !== null);
 };
 
-// Get max item ID
-export const getMaxItemId = async (): Promise<number> => {
-  const response = await axios.get<number>(`${BASE_URL}/maxitem.json`);
-  return response.data;
+/**
+ * Get the current max item ID.
+ */
+export const getMaxItemId = async (signal?: AbortSignal): Promise<number> => {
+  return fetchJson<number>(`${BASE_URL}/maxitem.json`, signal);
 };

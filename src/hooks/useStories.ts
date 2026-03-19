@@ -14,6 +14,8 @@ export const useStories = (
   const fetchStories = useStoriesStore((state) => state.fetchStories);
 
   useEffect(() => {
+    // Store internally manages its own AbortController:
+    // calling fetchStories aborts any previous in-flight request.
     fetchStories(page, itemsPerPage);
   }, [fetchStories, page, itemsPerPage]);
 
@@ -23,7 +25,7 @@ export const useStories = (
     error,
     totalStories,
     totalPages: Math.max(1, Math.ceil(totalStories / itemsPerPage)),
-    currentPage: currentPage ?? page,
+    currentPage,
   };
 };
 

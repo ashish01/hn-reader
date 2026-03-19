@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import useStoryWithComments from "../hooks/useStoryWithComments";
 import Comment from "./Comment";
 import { formatTime, formatUrl } from "../utils/formatters";
+import { sanitizeHtml } from "../utils/sanitize";
 
 interface StoryPageProps {
   storyId: number;
@@ -55,7 +56,7 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId }) => {
       </Link>
 
       <div className="story-details">
-        <h1>
+        <h2>
           <a
             href={`https://news.ycombinator.com/item?id=${story.id}`}
             target="_blank"
@@ -63,7 +64,7 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId }) => {
           >
             {story.title}
           </a>
-        </h1>
+        </h2>
 
         {story.url && (
           <div className="story-url">
@@ -76,7 +77,9 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId }) => {
         {story.text && (
           <div
             className="story-text"
-            dangerouslySetInnerHTML={{ __html: story.text }}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(story.text),
+            }}
           />
         )}
 
@@ -89,9 +92,9 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId }) => {
       </div>
 
       <div className="comments-section">
-        <h2>
+        <h3>
           {loadingComments ? "Loading Comments..." : `${commentCount} Comments`}
-        </h2>
+        </h3>
 
         {comments.length === 0 && !loadingComments ? (
           <div className="no-comments">No comments yet</div>

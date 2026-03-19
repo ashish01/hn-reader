@@ -1,14 +1,10 @@
 import React, { useCallback } from "react";
-import { Comment as CommentType } from "../types";
+import { CommentWithChildren } from "../types";
 import { formatTime } from "../utils/formatters";
+import { sanitizeHtml } from "../utils/sanitize";
 
 interface CommentProps {
-  comment: CommentType & {
-    children?: CommentType[];
-    isExpanded?: boolean;
-    childrenLoaded?: boolean;
-    isLoading?: boolean;
-  };
+  comment: CommentWithChildren;
   onToggle: (id: number) => void;
   onLoadChildren: (id: number) => void | Promise<void>;
   level?: number;
@@ -82,7 +78,9 @@ const Comment: React.FC<CommentProps> = ({
         <>
           <div
             className="comment-content"
-            dangerouslySetInnerHTML={{ __html: comment.text || "" }}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(comment.text || ""),
+            }}
           />
 
           {comment.kids &&

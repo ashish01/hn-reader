@@ -2,6 +2,9 @@ import { create } from "zustand";
 import { getTopStories, getStory } from "../api/hackernews";
 import { Story } from "../types";
 import { STORIES_PER_PAGE, TOTAL_STORIES_TO_FETCH } from "../utils/constants";
+import { pLimit } from "../utils/pLimit";
+
+const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
 
 interface StoriesState {
   stories: Story[];
@@ -13,57 +16,99 @@ interface StoriesState {
   fetchStories: (page: number, itemsPerPage?: number) => Promise<void>;
 }
 
-let storiesRequestId = 0;
+const useStoriesStore = create<StoriesState>((set) => {
+  // All mutable state inside closure — not module-level
+  let requestId = 0;
+  let cachedStoryIds: number[] | null = null;
+  let cacheTimestamp = 0;
+  let currentAbort: AbortController | null = null;
 
-const useStoriesStore = create<StoriesState>((set) => ({
-  stories: [],
-  loading: true,
-  error: null,
-  totalStories: 0,
-  currentPage: 0,
-  itemsPerPage: STORIES_PER_PAGE,
-  fetchStories: async (page, itemsPerPage = STORIES_PER_PAGE) => {
-    const requestId = ++storiesRequestId;
-    set({
-      loading: true,
-      error: null,
-      stories: [],
-      currentPage: page,
-      itemsPerPage,
-    });
+  const isCacheFresh = () =>
+    cachedStoryIds !== null && Date.now() - cacheTimestamp < CACHE_TTL_MS;
 
-    try {
-      const allStoryIds = await getTopStories(TOTAL_STORIES_TO_FETCH);
-      if (requestId !== storiesRequestId) return;
+  return {
+    stories: [],
+    loading: true,
+    error: null,
+    totalStories: 0,
+    currentPage: 0,
+    itemsPerPage: STORIES_PER_PAGE,
+    fetchStories: async (page, itemsPerPage = STORIES_PER_PAGE) => {
+      // Abort any in-flight request
+      if (currentAbort) {
+        currentAbort.abort();
+      }
+      const abort = new AbortController();
+      currentAbort = abort;
+      const thisRequest = ++requestId;
 
-      set({ totalStories: allStoryIds.length });
-
-      const startIndex = page * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      const paginatedIds = allStoryIds.slice(startIndex, endIndex);
-
-      const storyPromises = paginatedIds.map(async (id) => {
-        try {
-          return await getStory(id);
-        } catch (err) {
-          console.error(`Error fetching story ${id}:`, err);
-          return null;
-        }
-      });
-
-      const fetchedStories = await Promise.all(storyPromises);
-      if (requestId !== storiesRequestId) return;
-
-      const stories = fetchedStories.filter((story): story is Story => story !== null);
-      set({ stories, loading: false });
-    } catch (err) {
-      if (requestId !== storiesRequestId) return;
       set({
-        error: err instanceof Error ? err : new Error("An error occurred"),
-        loading: false,
+        loading: true,
+        error: null,
+        stories: [],
+        currentPage: page,
+        itemsPerPage,
       });
-    }
-  },
-}));
+
+      try {
+        let allStoryIds: number[];
+
+        if (isCacheFresh()) {
+          allStoryIds = cachedStoryIds!;
+        } else {
+          allStoryIds = await getTopStories(
+            TOTAL_STORIES_TO_FETCH,
+            abort.signal,
+          );
+          if (thisRequest !== requestId) return;
+          cachedStoryIds = allStoryIds;
+          cacheTimestamp = Date.now();
+        }
+
+        set({ totalStories: allStoryIds.length });
+
+        const startIndex = page * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedIds = allStoryIds.slice(startIndex, endIndex);
+
+        const limit = pLimit(15);
+        const storyPromises = paginatedIds.map((id) =>
+          limit(async () => {
+            try {
+              return await getStory(id, abort.signal);
+            } catch (err) {
+              if (
+                err instanceof DOMException &&
+                err.name === "AbortError"
+              ) {
+                throw err;
+              }
+              console.error(`Error fetching story ${id}:`, err);
+              return null;
+            }
+          }),
+        );
+
+        const fetchedStories = await Promise.all(storyPromises);
+        if (thisRequest !== requestId) return;
+
+        const stories = fetchedStories.filter(
+          (story): story is Story => story !== null,
+        );
+        set({ stories, loading: false });
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          return;
+        }
+        if (thisRequest !== requestId) return;
+        set({
+          error:
+            err instanceof Error ? err : new Error("An error occurred"),
+          loading: false,
+        });
+      }
+    },
+  };
+});
 
 export default useStoriesStore;

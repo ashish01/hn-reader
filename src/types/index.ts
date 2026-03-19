@@ -41,3 +41,10 @@ export interface User {
   about?: string;
   submitted?: number[];
 }
+
+export interface CommentWithChildren extends Comment {
+  children?: CommentWithChildren[];
+  isExpanded?: boolean;
+  childrenLoaded?: boolean;
+  isLoading?: boolean;
+}

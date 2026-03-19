@@ -20,6 +20,8 @@ export const useStoryWithComments = (storyId: number) => {
   );
 
   useEffect(() => {
+    // Store internally manages its own AbortController:
+    // calling fetchStoryWithComments aborts any previous in-flight request.
     fetchStoryWithComments(storyId);
   }, [fetchStoryWithComments, storyId]);
 
