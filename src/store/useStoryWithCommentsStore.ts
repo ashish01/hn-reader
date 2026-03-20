@@ -154,43 +154,53 @@ const useStoryWithCommentsStore = create<StoryWithCommentsState>(
           }
 
           const savedStates = getStoryCommentStates(storyId);
-          const commentsMap = new Map<number, CommentWithChildren>();
+          const orderedComments: Array<CommentWithChildren | null> =
+            fetchedStory.kids.map(() => null);
 
-          const commentPromises = fetchedStory.kids.map(async (kidId) => {
-            try {
-              const comment = await getComment(kidId, abort.signal);
-              if (thisRequest !== requestId) return;
+          const publishLoadedComments = () => {
+            if (thisRequest !== requestId) return;
 
-              const savedExpanded = savedStates[kidId];
-              const commentWithState: CommentWithChildren = {
-                ...comment,
-                isExpanded:
-                  savedExpanded !== undefined ? savedExpanded : true,
-                childrenLoaded: false,
-                children: [],
-              };
-              commentsMap.set(kidId, commentWithState);
-            } catch (err) {
-              if (
-                err instanceof DOMException &&
-                err.name === "AbortError"
-              ) {
-                throw err;
+            set({
+              comments: orderedComments.filter(
+                (comment): comment is CommentWithChildren => comment !== null,
+              ),
+            });
+          };
+
+          const commentPromises = fetchedStory.kids.map(
+            async (kidId, index) => {
+              try {
+                const comment = await getComment(kidId, abort.signal);
+                if (thisRequest !== requestId) return;
+
+                const savedExpanded = savedStates[kidId];
+                orderedComments[index] = {
+                  ...comment,
+                  isExpanded:
+                    savedExpanded !== undefined ? savedExpanded : true,
+                  childrenLoaded: false,
+                  children: [],
+                };
+
+                // Progressive rendering: publish comments as they arrive.
+                publishLoadedComments();
+              } catch (err) {
+                if (
+                  err instanceof DOMException &&
+                  err.name === "AbortError"
+                ) {
+                  throw err;
+                }
+                console.error(`Error fetching comment ${kidId}:`, err);
               }
-              console.error(`Error fetching comment ${kidId}:`, err);
-            }
-          });
+            },
+          );
 
           await Promise.all(commentPromises);
           if (thisRequest !== requestId) return;
 
-          const orderedComments: CommentWithChildren[] = [];
-          for (const kid of fetchedStory.kids) {
-            const comment = commentsMap.get(kid);
-            if (comment) orderedComments.push(comment);
-          }
-
-          set({ comments: orderedComments, loadingComments: false });
+          publishLoadedComments();
+          set({ loadingComments: false });
         } catch (err) {
           if (err instanceof DOMException && err.name === "AbortError") {
             return;
