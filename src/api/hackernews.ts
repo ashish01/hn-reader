@@ -1,14 +1,23 @@
+import axios from "axios";
 import { Item, Story, Comment } from "../types";
 import { pLimit } from "../utils/pLimit";
 
 const BASE_URL = "https://hacker-news.firebaseio.com/v0";
 
-const fetchJson = async <T>(url: string, signal?: AbortSignal): Promise<T> => {
-  const response = await fetch(url, { signal });
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+const requestJson = async <T>(
+  path: string,
+  signal?: AbortSignal,
+): Promise<T> => {
+  try {
+    const response = await axios.get<T>(`${BASE_URL}${path}`, { signal });
+    return response.data;
+  } catch (error) {
+    // Keep cancellation behavior compatible with existing store checks.
+    if (axios.isCancel(error)) {
+      throw new DOMException("The operation was aborted.", "AbortError");
+    }
+    throw error;
   }
-  return response.json() as Promise<T>;
 };
 
 /**
@@ -18,7 +27,7 @@ export const fetchItem = async <T extends Item = Item>(
   id: number,
   signal?: AbortSignal,
 ): Promise<T> => {
-  return fetchJson<T>(`${BASE_URL}/item/${id}.json`, signal);
+  return requestJson<T>(`/item/${id}.json`, signal);
 };
 
 export const getStory = async (
@@ -39,10 +48,7 @@ export const getTopStories = async (
   limit: number = 30,
   signal?: AbortSignal,
 ): Promise<number[]> => {
-  const ids = await fetchJson<number[]>(
-    `${BASE_URL}/topstories.json`,
-    signal,
-  );
+  const ids = await requestJson<number[]>("/topstories.json", signal);
   return ids.slice(0, limit);
 };
 
@@ -83,5 +89,5 @@ export const getItemsBatch = async (
  * Get the current max item ID.
  */
 export const getMaxItemId = async (signal?: AbortSignal): Promise<number> => {
-  return fetchJson<number>(`${BASE_URL}/maxitem.json`, signal);
+  return requestJson<number>("/maxitem.json", signal);
 };
