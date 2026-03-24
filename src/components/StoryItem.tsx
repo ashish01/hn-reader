@@ -25,8 +25,6 @@ const StoryItem: React.FC<StoryItemProps> = ({ story }) => {
           {story.url ? (
             <a
               href={story.url}
-              target="_blank"
-              rel="noopener noreferrer"
             >
               {story.title}
             </a>
