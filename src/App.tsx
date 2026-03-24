@@ -46,9 +46,9 @@ function App() {
   // Apply dark mode class to the body
   useEffect(() => {
     if (darkMode) {
-      document.body.classList.add("dark-mode");
+      document.documentElement.classList.add("dark-mode");
     } else {
-      document.body.classList.remove("dark-mode");
+      document.documentElement.classList.remove("dark-mode");
     }
   }, [darkMode]);
 

@@ -12,14 +12,18 @@
             data-cf-beacon='{"token": "83365f9a690348639aed424b260e9b63"}'
         ></script>
         <!-- End Cloudflare Web Analytics -->
+        <script>
+            try {
+                var saved = localStorage.getItem("darkMode");
+                var dark = saved !== null
+                    ? saved === "true"
+                    : window.matchMedia("(prefers-color-scheme: dark)").matches;
+                if (dark) document.documentElement.classList.add("dark-mode");
+            } catch (e) {}
+        </script>
     </head>
     <body>
         <div id="root"></div>
-        <script>
-            if (localStorage.getItem("darkMode") === "true") {
-                document.body.classList.add("dark-mode");
-            }
-        </script>
         <script type="module" src="/src/main.tsx"></script>
     </body>
 </html>
