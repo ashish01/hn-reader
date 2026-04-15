@@ -14,6 +14,10 @@ const StoriesPage: React.FC<StoriesPageProps> = ({ page }) => {
 
   // Calculate the starting index for the current page
   const startIndex = currentPage * STORIES_PER_PAGE;
+  const expectedStoriesOnPage = Math.min(
+    STORIES_PER_PAGE,
+    Math.max(totalStories - startIndex, 0),
+  );
 
   const getPagePath = (targetPage: number) =>
     targetPage <= 0 ? "/" : `/?page=${targetPage}`;
@@ -73,6 +77,9 @@ const StoriesPage: React.FC<StoriesPageProps> = ({ page }) => {
                 {startIndex + Math.min(stories.length, STORIES_PER_PAGE)} of{" "}
                 {totalStories})
               </span>
+              {loading && stories.length > 0
+                ? ` • loaded ${stories.length}/${expectedStoriesOnPage || STORIES_PER_PAGE}`
+                : null}
             </>
           )}
         </div>
@@ -96,7 +103,10 @@ const StoriesPage: React.FC<StoriesPageProps> = ({ page }) => {
       )}
 
       {stories.length > 0 && loading && (
-        <div className="loading-more">Loading more stories...</div>
+        <div className="loading-more">
+          Loading more stories... ({stories.length}/
+          {expectedStoriesOnPage || STORIES_PER_PAGE})
+        </div>
       )}
 
       {stories.length > 0 && (

@@ -70,12 +70,26 @@ const useStoriesStore = create<StoriesState>((set) => {
         const startIndex = page * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const paginatedIds = allStoryIds.slice(startIndex, endIndex);
+        const orderedStories: Array<Story | null> = paginatedIds.map(() => null);
+
+        const publishLoadedStories = (isFinal = false) => {
+          if (thisRequest !== requestId) return;
+
+          set({
+            stories: orderedStories.filter((story): story is Story => story !== null),
+            loading: !isFinal,
+          });
+        };
 
         const limit = pLimit(15);
-        const storyPromises = paginatedIds.map((id) =>
+        const storyPromises = paginatedIds.map((id, index) =>
           limit(async () => {
             try {
-              return await getStory(id, abort.signal);
+              const story = await getStory(id, abort.signal);
+              if (thisRequest !== requestId) return;
+
+              orderedStories[index] = story;
+              publishLoadedStories();
             } catch (err) {
               if (
                 err instanceof DOMException &&
@@ -84,18 +98,14 @@ const useStoriesStore = create<StoriesState>((set) => {
                 throw err;
               }
               console.error(`Error fetching story ${id}:`, err);
-              return null;
             }
           }),
         );
 
-        const fetchedStories = await Promise.all(storyPromises);
+        await Promise.all(storyPromises);
         if (thisRequest !== requestId) return;
 
-        const stories = fetchedStories.filter(
-          (story): story is Story => story !== null,
-        );
-        set({ stories, loading: false });
+        publishLoadedStories(true);
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") {
           return;
