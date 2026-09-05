@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Story } from "../types";
-import { formatTime, formatUrl } from "../utils/formatters";
+import { formatTime, formatSiteLabel } from "../utils/formatters";
 
 interface StoryItemProps {
   story: Story;
@@ -40,7 +40,7 @@ const StoryItem: React.FC<StoryItemProps> = ({ story }) => {
             </Link>
           )}
           {story.url && (
-            <span className="story-domain">({formatUrl(story.url)})</span>
+            <span className="story-domain">({formatSiteLabel(story.url)})</span>
           )}
         </div>
       </div>

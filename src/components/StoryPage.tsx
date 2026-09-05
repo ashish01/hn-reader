@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import useStoryWithComments from "../hooks/useStoryWithComments";
 import Comment from "./Comment";
-import { formatTime, formatUrl } from "../utils/formatters";
+import { formatTime, formatSiteLabel } from "../utils/formatters";
 import { sanitizeHtml } from "../utils/sanitize";
 
 interface StoryPageProps {
@@ -71,7 +71,7 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId }) => {
         {story.url && (
           <div className="story-url">
             <a href={story.url} target="_blank" rel="noopener noreferrer">
-              {formatUrl(story.url)}
+              {formatSiteLabel(story.url)}
             </a>
           </div>
         )}
