@@ -301,21 +301,15 @@ button:focus-visible {
 }
 
 /* Indentation for comments, capped at level 4 */
-.comment-indent-1 {
-    margin-left: 15px;
-}
-.comment-indent-2 {
-    margin-left: 30px;
-}
-.comment-indent-3 {
-    margin-left: 45px;
-}
+.comment-indent-1,
+.comment-indent-2,
+.comment-indent-3,
 .comment-indent-4 {
-    margin-left: 60px;
+    margin-left: 15px;
 }
 
 .deeply-nested {
-    margin-left: 60px !important;
+    margin-left: 0;
 }
 
 .comment-header {

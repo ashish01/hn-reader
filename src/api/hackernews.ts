@@ -3,6 +3,8 @@ import { Item, Story, Comment } from "../types";
 import { pLimit } from "../utils/pLimit";
 
 const BASE_URL = "https://hacker-news.firebaseio.com/v0";
+// One budget for all items, including concurrently opened reply threads.
+const limitItemRequests = pLimit(15);
 
 const requestJson = async <T>(
   path: string,
@@ -26,22 +28,29 @@ const requestJson = async <T>(
 export const fetchItem = async <T extends Item = Item>(
   id: number,
   signal?: AbortSignal,
-): Promise<T> => {
-  return requestJson<T>(`/item/${id}.json`, signal);
+): Promise<T | null> => {
+  return limitItemRequests(() => {
+    signal?.throwIfAborted();
+    return requestJson<T | null>(`/item/${id}.json`, signal);
+  });
 };
 
 export const getStory = async (
   id: number,
   signal?: AbortSignal,
 ): Promise<Story> => {
-  return fetchItem<Story>(id, signal);
+  const story = await fetchItem<Story>(id, signal);
+  if (!story) throw new Error("Story not found");
+  return story;
 };
 
 export const getComment = async (
   id: number,
   signal?: AbortSignal,
 ): Promise<Comment> => {
-  return fetchItem<Comment>(id, signal);
+  const comment = await fetchItem<Comment>(id, signal);
+  if (!comment) throw new Error("Comment unavailable");
+  return comment;
 };
 
 export const getTopStories = async (

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import StoryItem from "./StoryItem";
 import PaginationNav from "./PaginationNav";
 import useStories from "../hooks/useStories";
@@ -9,8 +10,10 @@ interface StoriesPageProps {
 }
 
 const StoriesPage: React.FC<StoriesPageProps> = ({ page }) => {
-  const { stories, loading, error, totalPages, currentPage, totalStories } =
-    useStories(page);
+  const {
+    stories, loading, error, totalPages, currentPage, totalStories,
+    failedStoryIds, retryFailed, outOfRange,
+  } = useStories(page);
 
   // Calculate the starting index for the current page
   const startIndex = currentPage * STORIES_PER_PAGE;
@@ -37,6 +40,14 @@ const StoriesPage: React.FC<StoriesPageProps> = ({ page }) => {
     window.scrollTo(0, 0);
   };
 
+  if (outOfRange) {
+    return (
+      <div className="error">
+        This page is out of range. <Link to="/">Back to stories</Link>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="error">
@@ -57,6 +68,15 @@ const StoriesPage: React.FC<StoriesPageProps> = ({ page }) => {
     <div className="stories-page">
       <h2>Hacker News Top Stories</h2>
 
+      {failedStoryIds.length > 0 && (
+        <div role="alert">
+          {failedStoryIds.length} stories could not be loaded.{" "}
+          <button type="button" className="load-more-button" onClick={retryFailed} disabled={loading}>
+            Retry missing stories
+          </button>
+        </div>
+      )}
+
       <div className="stories-controls">
         <PaginationNav
           currentPage={currentPage}
@@ -71,12 +91,14 @@ const StoriesPage: React.FC<StoriesPageProps> = ({ page }) => {
           ) : (
             <>
               Page {currentPage + 1} of {totalPages}
-              <span className="page-range">
-                {" "}
-                (stories {startIndex + 1}-
-                {startIndex + Math.min(stories.length, STORIES_PER_PAGE)} of{" "}
-                {totalStories})
-              </span>
+              {stories.length > 0 && (
+                <span className="page-range">
+                  {" "}
+                  (stories {startIndex + 1}-
+                  {startIndex + Math.min(stories.length, STORIES_PER_PAGE)} of{" "}
+                  {totalStories})
+                </span>
+              )}
               {loading && stories.length > 0
                 ? ` • loaded ${stories.length}/${expectedStoriesOnPage || STORIES_PER_PAGE}`
                 : null}
@@ -84,6 +106,10 @@ const StoriesPage: React.FC<StoriesPageProps> = ({ page }) => {
           )}
         </div>
       </div>
+
+      {!loading && stories.length === 0 && failedStoryIds.length === 0 && (
+        <p>No stories available.</p>
+      )}
 
       {stories.length === 0 && loading ? (
         <div className="loading-indicator">Loading stories...</div>

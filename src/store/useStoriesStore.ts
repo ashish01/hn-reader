@@ -10,13 +10,17 @@ interface StoriesState {
   stories: Story[];
   loading: boolean;
   error: Error | null;
+  failedStoryIds: number[];
+  outOfRange: boolean;
+  retryFailed: () => Promise<void>;
+  cancel: () => void;
   totalStories: number;
   currentPage: number;
   itemsPerPage: number;
-  fetchStories: (page: number, itemsPerPage?: number) => Promise<void>;
+  fetchStories: (page: number, itemsPerPage?: number, retry?: boolean) => Promise<void>;
 }
 
-const useStoriesStore = create<StoriesState>((set) => {
+const useStoriesStore = create<StoriesState>((set, get) => {
   // All mutable state inside closure — not module-level
   let requestId = 0;
   let cachedStoryIds: number[] | null = null;
@@ -30,10 +34,18 @@ const useStoriesStore = create<StoriesState>((set) => {
     stories: [],
     loading: true,
     error: null,
+    failedStoryIds: [],
+    outOfRange: false,
+    cancel: () => {
+      requestId++;
+      currentAbort?.abort();
+    },
+    retryFailed: () => get().fetchStories(get().currentPage, get().itemsPerPage, true),
     totalStories: 0,
     currentPage: 0,
     itemsPerPage: STORIES_PER_PAGE,
-    fetchStories: async (page, itemsPerPage = STORIES_PER_PAGE) => {
+    fetchStories: async (page, itemsPerPage = STORIES_PER_PAGE, retry = false) => {
+      const previous = get();
       // Abort any in-flight request
       if (currentAbort) {
         currentAbort.abort();
@@ -45,7 +57,9 @@ const useStoriesStore = create<StoriesState>((set) => {
       set({
         loading: true,
         error: null,
-        stories: [],
+        stories: retry ? previous.stories : [],
+        failedStoryIds: [],
+        outOfRange: false,
         currentPage: page,
         itemsPerPage,
       });
@@ -53,7 +67,7 @@ const useStoriesStore = create<StoriesState>((set) => {
       try {
         let allStoryIds: number[];
 
-        if (isCacheFresh()) {
+        if (isCacheFresh() || (retry && cachedStoryIds !== null)) {
           allStoryIds = cachedStoryIds!;
         } else {
           allStoryIds = await getTopStories(
@@ -67,10 +81,18 @@ const useStoriesStore = create<StoriesState>((set) => {
 
         set({ totalStories: allStoryIds.length });
 
+        if (!Number.isSafeInteger(page) || page < 0 || page >= Math.max(1, Math.ceil(allStoryIds.length / itemsPerPage))) {
+          set({ outOfRange: true, stories: [], loading: false });
+          return;
+        }
+
         const startIndex = page * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const paginatedIds = allStoryIds.slice(startIndex, endIndex);
-        const orderedStories: Array<Story | null> = paginatedIds.map(() => null);
+        const orderedStories: Array<Story | null> = paginatedIds.map((id) =>
+          retry ? previous.stories.find((story) => story.id === id) ?? null : null,
+        );
+        const failures: number[] = [];
 
         const publishLoadedStories = (isFinal = false) => {
           if (thisRequest !== requestId) return;
@@ -84,11 +106,12 @@ const useStoriesStore = create<StoriesState>((set) => {
         const limit = pLimit(15);
         const storyPromises = paginatedIds.map((id, index) =>
           limit(async () => {
+            if (retry && !previous.failedStoryIds.includes(id)) return;
             try {
               const story = await getStory(id, abort.signal);
               if (thisRequest !== requestId) return;
 
-              orderedStories[index] = story;
+              orderedStories[index] = story.deleted || story.dead ? null : story;
               publishLoadedStories();
             } catch (err) {
               if (
@@ -98,6 +121,7 @@ const useStoriesStore = create<StoriesState>((set) => {
                 throw err;
               }
               console.error(`Error fetching story ${id}:`, err);
+              failures.push(id);
             }
           }),
         );
@@ -106,6 +130,7 @@ const useStoriesStore = create<StoriesState>((set) => {
         if (thisRequest !== requestId) return;
 
         publishLoadedStories(true);
+        set({ failedStoryIds: failures });
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") {
           return;

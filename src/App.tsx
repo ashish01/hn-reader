@@ -43,12 +43,12 @@ function App() {
   const darkMode = useAppStore((state) => state.darkMode);
   const toggleDarkMode = useAppStore((state) => state.toggleDarkMode);
 
-  // Apply dark mode class to the body
+  // Keep the document canvas and browser controls in the selected theme.
   useEffect(() => {
     if (darkMode) {
-      document.body.classList.add("dark-mode");
+      document.documentElement.classList.add("dark-mode");
     } else {
-      document.body.classList.remove("dark-mode");
+      document.documentElement.classList.remove("dark-mode");
     }
   }, [darkMode]);
 

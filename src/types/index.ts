@@ -47,4 +47,5 @@ export interface CommentWithChildren extends Comment {
   isExpanded?: boolean;
   childrenLoaded?: boolean;
   isLoading?: boolean;
+  childrenError?: string | null;
 }

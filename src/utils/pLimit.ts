@@ -18,7 +18,7 @@ export function pLimit(concurrency: number) {
   const limit = <T>(fn: () => Promise<T>): Promise<T> => {
     return new Promise<T>((resolve, reject) => {
       const run = () => {
-        fn()
+        Promise.resolve().then(fn)
           .then(resolve)
           .catch(reject)
           .finally(() => {

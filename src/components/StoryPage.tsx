@@ -25,6 +25,8 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId }) => {
     loading,
     loadingComments,
     error,
+    commentsError,
+    retryComments,
     toggleComment,
     loadCommentChildren,
   } = useStoryWithComments(storyId);
@@ -96,7 +98,16 @@ const StoryPage: React.FC<StoryPageProps> = ({ storyId }) => {
           {loadingComments ? "Loading Comments..." : `${commentCount} Comments`}
         </h3>
 
-        {comments.length === 0 && !loadingComments ? (
+        {commentsError && (
+          <div role="alert">
+            {commentsError}{" "}
+            <button type="button" className="load-more-button" onClick={retryComments}>
+              Retry missing comments
+            </button>
+          </div>
+        )}
+
+        {comments.length === 0 && !loadingComments && !commentsError ? (
           <div className="no-comments">No comments yet</div>
         ) : (
           <div className="comments-list">

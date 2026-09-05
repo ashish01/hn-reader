@@ -12,17 +12,25 @@ export const useStories = (
   const totalStories = useStoriesStore((state) => state.totalStories);
   const currentPage = useStoriesStore((state) => state.currentPage);
   const fetchStories = useStoriesStore((state) => state.fetchStories);
+  const failedStoryIds = useStoriesStore((state) => state.failedStoryIds);
+  const retryFailed = useStoriesStore((state) => state.retryFailed);
+  const outOfRange = useStoriesStore((state) => state.outOfRange);
+  const cancel = useStoriesStore((state) => state.cancel);
 
   useEffect(() => {
     // Store internally manages its own AbortController:
     // calling fetchStories aborts any previous in-flight request.
     fetchStories(page, itemsPerPage);
-  }, [fetchStories, page, itemsPerPage]);
+    return cancel;
+  }, [fetchStories, page, itemsPerPage, cancel]);
 
   return {
     stories,
     loading,
     error,
+    failedStoryIds,
+    retryFailed,
+    outOfRange,
     totalStories,
     totalPages: Math.max(1, Math.ceil(totalStories / itemsPerPage)),
     currentPage,

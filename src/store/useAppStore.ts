@@ -30,7 +30,7 @@ const readDarkMode = (): boolean => {
     );
   } catch (error) {
     console.error("Error reading dark mode from localStorage:", error);
-    return false;
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
   }
 };
 

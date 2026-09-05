@@ -30,23 +30,15 @@ const Comment: React.FC<CommentProps> = ({
     }
   }, [comment.childrenLoaded, comment.id, comment.kids, onLoadChildren]);
 
-  // If the comment is deleted or dead, show minimal content
-  if (comment.deleted || comment.dead) {
-    return (
-      <div className="comment comment-deleted">
-        <div className="comment-content">[deleted]</div>
-      </div>
-    );
-  }
+  const unavailable = comment.deleted || comment.dead;
 
-  // Determine border style for deeply nested comments (level > MAX_INDENT)
+  // Nested elements add indentation only through MAX_INDENT.
   const extraClass = level > MAX_INDENT ? "deeply-nested" : "";
 
   // Determine indentation class (levels 1 to MAX_INDENT)
   const indentClass =
     level > 0 && level <= MAX_INDENT ? `comment-indent-${level}` : "";
 
-  // Combine classes, ensuring deeply-nested overrides indentClass margin if needed
   const combinedClasses = ["comment", extraClass, indentClass]
     .filter(Boolean)
     .join(" ");
@@ -76,12 +68,18 @@ const Comment: React.FC<CommentProps> = ({
 
       {expanded && (
         <>
-          <div
-            className="comment-content"
-            dangerouslySetInnerHTML={{
-              __html: sanitizeHtml(comment.text || ""),
-            }}
-          />
+          {unavailable ? (
+            <div className="comment-deleted">[deleted]</div>
+          ) : (
+            <div
+              className="comment-content"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(comment.text || ""),
+              }}
+            />
+          )}
+
+          {comment.childrenError && <div role="alert">{comment.childrenError}</div>}
 
           {comment.kids &&
             comment.kids.length > 0 &&
@@ -94,7 +92,9 @@ const Comment: React.FC<CommentProps> = ({
               >
                 {comment.isLoading
                   ? "Loading..."
-                  : `Load replies (${comment.kids.length})`}
+                  : comment.childrenError
+                    ? "Retry missing replies"
+                    : `Load replies (${comment.kids.length})`}
               </button>
             )}
 

@@ -9,6 +9,9 @@ export const useStoryWithComments = (storyId: number) => {
     (state) => state.loadingComments,
   );
   const error = useStoryWithCommentsStore((state) => state.error);
+  const commentsError = useStoryWithCommentsStore((state) => state.commentsError);
+  const retryComments = useStoryWithCommentsStore((state) => state.retryComments);
+  const cancel = useStoryWithCommentsStore((state) => state.cancel);
   const fetchStoryWithComments = useStoryWithCommentsStore(
     (state) => state.fetchStoryWithComments,
   );
@@ -23,7 +26,8 @@ export const useStoryWithComments = (storyId: number) => {
     // Store internally manages its own AbortController:
     // calling fetchStoryWithComments aborts any previous in-flight request.
     fetchStoryWithComments(storyId);
-  }, [fetchStoryWithComments, storyId]);
+    return cancel;
+  }, [fetchStoryWithComments, storyId, cancel]);
 
   return {
     story,
@@ -31,6 +35,8 @@ export const useStoryWithComments = (storyId: number) => {
     loading,
     loadingComments,
     error,
+    commentsError,
+    retryComments,
     toggleComment,
     loadCommentChildren,
   };
