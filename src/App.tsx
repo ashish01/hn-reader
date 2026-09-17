@@ -59,6 +59,15 @@ function App() {
           <Link to="/">HN Reader</Link>
         </h1>
         <div className="app-header-actions">
+          <a
+            href="https://hn-tags.beehivesoftware.xyz/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tags-link"
+            title="Browse HN stories by topic"
+          >
+            HN Tags
+          </a>
           <button
             type="button"
             className="theme-toggle"

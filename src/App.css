@@ -45,6 +45,23 @@ button:focus-visible {
 .app-header-actions {
     display: flex;
     gap: 10px;
+    align-items: center;
+}
+
+.tags-link {
+    font-size: 12px;
+    color: var(--light-text);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.tags-link:hover {
+    color: var(--hn-orange);
+    text-decoration: underline;
+}
+
+.tags-link:visited {
+    color: var(--light-text);
 }
 
 .app-title {
